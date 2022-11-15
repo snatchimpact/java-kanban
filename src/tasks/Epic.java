@@ -7,7 +7,6 @@ public class Epic extends Task{
 
     public Epic(String title, String description, int id) {
         super(title, description, id);
-        status = "NEW";
     }
 
     public void addSubtaskToSubtasksList(Subtask subtask){
@@ -17,7 +16,8 @@ public class Epic extends Task{
     }
 
     public ArrayList<Integer> getSubtasksIDsList() {
-        return subtasksIDsList;
+        ArrayList<Integer> returnableSubtasksIDsList = subtasksIDsList;
+        return returnableSubtasksIDsList;
     }
 
     public void clearSubtasksIDsList(){

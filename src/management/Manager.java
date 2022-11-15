@@ -1,6 +1,7 @@
 package management;
 
 import tasks.Epic;
+import tasks.Status;
 import tasks.Subtask;
 import tasks.Task;
 
@@ -10,9 +11,9 @@ import java.util.HashMap;
 
 public class Manager {
     int idCounter = 0;
-    public HashMap<Integer, tasks.Task> tasksContainer = new HashMap<>();
-    public HashMap<Integer, tasks.Epic> epicsContainer = new HashMap<>();
-    public HashMap<Integer, tasks.Subtask> subtasksContainer = new HashMap<>();
+    public HashMap<Integer, Task> tasksContainer = new HashMap<>();
+    public HashMap<Integer, Epic> epicsContainer = new HashMap<>();
+    public HashMap<Integer, Subtask> subtasksContainer = new HashMap<>();
 
     public int getNextID(){
         idCounter = idCounter + 1;
@@ -136,7 +137,7 @@ public class Manager {
         }
     }
 
-    public Task addNewTask(String tasksTitle, String description, String status){
+    public Task addNewTask(String tasksTitle, String description, Status status){
         Task task = new tasks.Task(tasksTitle, description, getNextID(), status);
         tasksContainer.put(task.getId(), task);
         return task;
@@ -149,7 +150,7 @@ public class Manager {
     }
 
 
-    public Subtask addNewSubtask(Epic epic, String subtasksTitle, String description, String status){
+    public Subtask addNewSubtask(Epic epic, String subtasksTitle, String description, Status status){
         Subtask subtask = new tasks.Subtask(epic, subtasksTitle, description, getNextID(), status);
         epic.addSubtaskToSubtasksList(subtask);
         subtasksContainer.put(subtask.getId(), subtask);
@@ -157,13 +158,13 @@ public class Manager {
         return subtask;
     }
 
-    public String deduceEpicsStatus(Epic epic) {
+    public Status deduceEpicsStatus(Epic epic) {
         ArrayList<Integer> subtasksIDsList = epic.getSubtasksIDsList();
-        String deducedStatus = "IN_PROGRESS";
+        Status deducedStatus = Status.IN_PROGRESS;
         if(checkIfAllSubtasksHaveSameStatus(epic)){
             deducedStatus = subtasksContainer.get(subtasksIDsList.get(0)).getStatus();
         } else if (subtasksIDsList.isEmpty()){
-            deducedStatus = "NEW";
+            deducedStatus = Status.NEW;
         }
         return deducedStatus;
     }

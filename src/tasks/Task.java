@@ -1,13 +1,15 @@
 package tasks;
 
+import java.util.Objects;
+
 public class Task {
     protected String title;
     protected String description;
     protected int id;
-    protected String status;
+    protected Status status = Status.NEW;
 
 
-    public Task(String title, String description, int id, String status) {
+    public Task(String title, String description, int id, Status status) {
         this.title = title;
         this.description = description;
         this.id = id;
@@ -24,11 +26,11 @@ public class Task {
         return id;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
@@ -42,6 +44,29 @@ public class Task {
                 '}';
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 17;
+        if(title != null){
+            hash = hash + title.hashCode();
+        }
+        hash = hash * 31;
 
+        if (description != null){
+            hash = hash + description.hashCode();
+        }
+        return hash;
+    }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (this.getClass() != obj.getClass()) return false;
+        Task otherTask = (Task) obj;
+        return Objects.equals(title, otherTask.title) &&
+                Objects.equals(description, otherTask.description) &&
+                (id == otherTask.id) &&
+                Objects.equals(status, otherTask.status);
+    }
 }
