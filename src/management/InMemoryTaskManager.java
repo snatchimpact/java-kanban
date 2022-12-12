@@ -5,50 +5,54 @@ import tasks.Status;
 import tasks.Subtask;
 import tasks.Task;
 
-//import java.util.ArrayList;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
-public class Manager {
+//import static management.Managers.inMemoryHistoryManager;
+
+public class InMemoryTaskManager implements TaskManager {
     int idCounter = 0;
+    HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
+//    public List<Task> viewingHistory = new ArrayList<>();
     public HashMap<Integer, Task> tasksContainer = new HashMap<>();
     public HashMap<Integer, Epic> epicsContainer = new HashMap<>();
     public HashMap<Integer, Subtask> subtasksContainer = new HashMap<>();
 
+
+    @Override
     public int getNextID(){
         idCounter = idCounter + 1;
         return idCounter;
     }
 
-
-//   Тут находятся описанные в ТЗ требуемые методы
-
-    //   Требование №1 к Менеджеру - получение списка всех задач, эпиков, подзадач
+    @Override
     public ArrayList<Integer> getListOfAllTasks(){
         return new ArrayList<>(tasksContainer.keySet());
     }
 
+    @Override
     public ArrayList<Integer> getListOfAllEpics() {
         return new ArrayList<>(epicsContainer.keySet());
     }
 
+    @Override
     public ArrayList<Integer> getListOfAllSubtasks() {
         return new ArrayList<>(subtasksContainer.keySet());
     }
 
-
-
-    // Требование №2 к Менеджеру - удаление всех задач, эпиков, подзадач
-
+    @Override
     public void deleteAllTasks(){
         tasksContainer.clear();
     }
 
+    @Override
     public void deleteAllEpics(){
         subtasksContainer.clear();
         epicsContainer.clear();
     }
 
+    @Override
     public void deleteAllSubtasks() {
         for (Epic epic : epicsContainer.values()) {
             epic.clearSubtasksIDsList();
@@ -57,14 +61,16 @@ public class Manager {
         subtasksContainer.clear();
     }
 
-
-    // Требование №3 к Менеджеру - получение по идентификатору.
-    public Task getTaskByID (int taskNumber){
+    @Override
+    public Task getTask(int taskNumber){
         if (tasksContainer.containsKey(taskNumber)){
+            inMemoryHistoryManager.add(tasksContainer.get(taskNumber));
             return tasksContainer.get(taskNumber);
         } else if (epicsContainer.containsKey(taskNumber)){
+            inMemoryHistoryManager.add(tasksContainer.get(taskNumber));
             return epicsContainer.get(taskNumber);
         } else if (subtasksContainer.containsKey(taskNumber)){
+            inMemoryHistoryManager.add(tasksContainer.get(taskNumber));
             return subtasksContainer.get(taskNumber);
         } else {
             System.out.println("Задачи, эпика, или подзадачи с ID " + taskNumber + " в менеджере задач - нет.");
@@ -72,10 +78,14 @@ public class Manager {
         return null;
     }
 
+    @Override
+    public List<Task> getHistory(){
+        return inMemoryHistoryManager.getHistory();
+    }
 
-// Требование №4 к Менеджеру - создание задачи, эпика, подзадачи.
 
-    public void  addTask(Task task) {
+    @Override
+    public void addTask(Task task) {
         tasksContainer.put(task.getId(), task);
     }
 
@@ -84,6 +94,7 @@ public class Manager {
 
     }
 
+    @Override
     public void addSubtask(Subtask subtask){
         Epic epic = epicsContainer.get(subtask.getEpicID());
         epic.addSubtaskToSubtasksList(subtask);
@@ -91,21 +102,21 @@ public class Manager {
         epic.setStatus(deduceEpicsStatus(epic));
     }
 
-
-
-    //  Требование №5 к Менеджеру - обновление задачи, эпика, подзадачи
+    @Override
     public void changeTask(Task task) {
         if (tasksContainer.get(task.getId()) != null) {
             tasksContainer.put(task.getId(), task);
         }
     }
 
+    @Override
     public void changeEpic(Epic epic){
         if (epicsContainer.get(epic.getId()) != null){
             epicsContainer.put(epic.getId(), epic);
         }
     }
 
+    @Override
     public void changeSubtask(Subtask subtask){
         if (subtasksContainer.get(subtask.getId()) != null){
             Epic epic = epicsContainer.get(subtask.getEpicID());
@@ -115,8 +126,7 @@ public class Manager {
         }
     }
 
-
-    // Требование №6 к Менеджеру - удаление по идентификатору.
+    @Override
     public void deleteTaskByID (int taskNumber){
         if (tasksContainer.containsKey(taskNumber)){
             tasksContainer.remove(taskNumber);
@@ -137,19 +147,21 @@ public class Manager {
         }
     }
 
+    @Override
     public Task addNewTask(String tasksTitle, String description, Status status){
         Task task = new tasks.Task(tasksTitle, description, getNextID(), status);
         tasksContainer.put(task.getId(), task);
         return task;
     }
 
+    @Override
     public Epic addNewEpic(String epicsTitle, String description){
         Epic epic = new tasks.Epic(epicsTitle, description, getNextID());
         epicsContainer.put(epic.getId(), epic);
         return epic;
     }
 
-
+    @Override
     public Subtask addNewSubtask(Epic epic, String subtasksTitle, String description, Status status){
         Subtask subtask = new tasks.Subtask(epic, subtasksTitle, description, getNextID(), status);
         epic.addSubtaskToSubtasksList(subtask);
@@ -158,6 +170,7 @@ public class Manager {
         return subtask;
     }
 
+    @Override
     public Status deduceEpicsStatus(Epic epic) {
         ArrayList<Integer> subtasksIDsList = epic.getSubtasksIDsList();
         Status deducedStatus = Status.IN_PROGRESS;
@@ -169,6 +182,7 @@ public class Manager {
         return deducedStatus;
     }
 
+    @Override
     public boolean checkIfAllSubtasksHaveSameStatus (Epic epic) {
         ArrayList<Integer> subtasksIDsList = epic.getSubtasksIDsList();
         boolean doAllSubtasksHaveSameStatus = true;
@@ -180,6 +194,8 @@ public class Manager {
         return doAllSubtasksHaveSameStatus;
     }
 
+
+
     @Override
     public String toString() {
         return "Manager{" +
@@ -189,5 +205,6 @@ public class Manager {
                 ", subtasksContainer=" + subtasksContainer +
                 '}';
     }
+
 
 }
