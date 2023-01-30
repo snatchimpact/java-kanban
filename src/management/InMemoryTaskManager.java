@@ -14,7 +14,6 @@ import java.util.List;
 public class InMemoryTaskManager implements TaskManager {
     int idCounter = 0;
     HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
-//    public List<Task> viewingHistory = new ArrayList<>();
     public HashMap<Integer, Task> tasksContainer = new HashMap<>();
     public HashMap<Integer, Epic> epicsContainer = new HashMap<>();
     public HashMap<Integer, Subtask> subtasksContainer = new HashMap<>();
@@ -43,12 +42,21 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteAllTasks(){
+        for (int taskID : tasksContainer.keySet()){
+            inMemoryHistoryManager.remove(taskID);
+        }
         tasksContainer.clear();
     }
 
     @Override
     public void deleteAllEpics(){
+        for (int taskID : subtasksContainer.keySet()){
+            inMemoryHistoryManager.remove(taskID);
+        }
         subtasksContainer.clear();
+        for (int taskID : epicsContainer.keySet()){
+            inMemoryHistoryManager.remove(taskID);
+        }
         epicsContainer.clear();
     }
 
@@ -58,22 +66,25 @@ public class InMemoryTaskManager implements TaskManager {
             epic.clearSubtasksIDsList();
             epic.setStatus(deduceEpicsStatus(epic));
         }
+        for (int taskID : subtasksContainer.keySet()){
+            inMemoryHistoryManager.remove(taskID);
+        }
         subtasksContainer.clear();
     }
 
     @Override
-    public Task getTask(int taskNumber){
-        if (tasksContainer.containsKey(taskNumber)){
-            inMemoryHistoryManager.add(tasksContainer.get(taskNumber));
-            return tasksContainer.get(taskNumber);
-        } else if (epicsContainer.containsKey(taskNumber)){
-            inMemoryHistoryManager.add(tasksContainer.get(taskNumber));
-            return epicsContainer.get(taskNumber);
-        } else if (subtasksContainer.containsKey(taskNumber)){
-            inMemoryHistoryManager.add(tasksContainer.get(taskNumber));
-            return subtasksContainer.get(taskNumber);
+    public Task getTask(int taskID){
+        if (tasksContainer.containsKey(taskID)){
+            inMemoryHistoryManager.add(tasksContainer.get(taskID));
+            return tasksContainer.get(taskID);
+        } else if (epicsContainer.containsKey(taskID)){
+            inMemoryHistoryManager.add(epicsContainer.get(taskID));
+            return epicsContainer.get(taskID);
+        } else if (subtasksContainer.containsKey(taskID)){
+            inMemoryHistoryManager.add(subtasksContainer.get(taskID));
+            return subtasksContainer.get(taskID);
         } else {
-            System.out.println("Задачи, эпика, или подзадачи с ID " + taskNumber + " в менеджере задач - нет.");
+            System.out.println("Задачи, эпика, или подзадачи с ID " + taskID + " в менеджере задач - нет.");
         }
         return null;
     }
@@ -127,23 +138,26 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void deleteTaskByID (int taskNumber){
-        if (tasksContainer.containsKey(taskNumber)){
-            tasksContainer.remove(taskNumber);
-        } else if (epicsContainer.containsKey(taskNumber)){
-            Epic epic = epicsContainer.get(taskNumber);
+    public void deleteTaskByID (int taskID){
+        if (tasksContainer.containsKey(taskID)){
+            tasksContainer.remove(taskID);
+            inMemoryHistoryManager.remove(taskID);
+        } else if (epicsContainer.containsKey(taskID)){
+            Epic epic = epicsContainer.get(taskID);
             ArrayList<Integer> subtasksList = epic.getSubtasksIDsList();
             for (int subtasksID : subtasksList) {
+                inMemoryHistoryManager.remove(subtasksID);
                 subtasksContainer.remove(subtasksID);
             }
-            epicsContainer.remove(taskNumber);
-        } else if (subtasksContainer.containsKey(taskNumber)){
-            Epic epic = epicsContainer.get(subtasksContainer.get(taskNumber).getEpicID());
-            epic.removeSubtaskFromSubtasksIDsList(taskNumber);
-            subtasksContainer.remove(taskNumber);
+            inMemoryHistoryManager.remove(taskID);
+            epicsContainer.remove(taskID);
+        } else if (subtasksContainer.containsKey(taskID)){
+            Epic epic = epicsContainer.get(subtasksContainer.get(taskID).getEpicID());
+            epic.removeSubtaskFromSubtasksIDsList(taskID);
+            subtasksContainer.remove(taskID);
             epic.setStatus(deduceEpicsStatus(epic));
         } else {
-            System.out.println("Задачи, эпика, или подзадачи с ID " + taskNumber + " в менеджере задач - нет.");
+            System.out.println("Задачи, эпика, или подзадачи с ID " + taskID + " в менеджере задач - нет.");
         }
     }
 
