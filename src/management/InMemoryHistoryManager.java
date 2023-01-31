@@ -13,8 +13,8 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     //Оформляем внутренний класс CustomLinkedList и складываем в него все методы, относящиеся к нему
     static class CustomLinkedList {
-        public Node<Task> head = null;
-        public Node<Task> tail = null;
+        private Node<Task> head = null;
+        private Node<Task> tail = null;
         public void linkLast(Task task){
             Node<Task> newNode = new Node<>(task);
             if(head == null){
@@ -42,7 +42,6 @@ public class InMemoryHistoryManager implements HistoryManager {
                 return viewedTasksArrayList;
             }
         }
-
 
 
         public void removeNode(Node<Task> node){
@@ -75,7 +74,6 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         }
     }
-
 
 
 
