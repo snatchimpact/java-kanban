@@ -11,7 +11,6 @@ public class Main {
         taskManager.addNewTask("Second Task", "Task No.2 lorem ipsum", Status.NEW);
         //Добавляем первый Эпик - с тремя подзадачами
         Epic epic1 = taskManager.addNewEpic("First Epic", "Epic No.1 Lorem ipsum");
-
         taskManager.addNewSubtask(epic1, "1st Epic's First Subtask",
                 "1st Epic's 1st Subtask Lorem ipsum",
                 Status.NEW);
@@ -23,6 +22,9 @@ public class Main {
                 Status.DONE);
         //Добавляем второй Эпик - без подзадач
         taskManager.addNewEpic("Second Epic", "Epic No.2 Lorem ipsum");
+
+
+
 
         //Запрашиваем созданные задачи в разном порядке
         System.out.println(taskManager.getTask(1));

@@ -1,5 +1,5 @@
 package management;
-
+//Класс, описывающий узел истории просмотра задач
 public class Node<Task>{
     public Task task;
     public Node<Task> next;
