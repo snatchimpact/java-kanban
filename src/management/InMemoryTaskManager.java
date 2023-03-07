@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-//import static management.Managers.inMemoryHistoryManager;
 
 public class InMemoryTaskManager implements TaskManager {
     int idCounter = 0;
@@ -93,7 +92,6 @@ public class InMemoryTaskManager implements TaskManager {
     public List<Task> getHistory(){
         return inMemoryHistoryManager.getHistory();
     }
-
 
     @Override
     public void addTask(Task task) {
@@ -220,5 +218,5 @@ public class InMemoryTaskManager implements TaskManager {
                 '}';
     }
 
-
 }
+

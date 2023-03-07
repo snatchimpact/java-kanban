@@ -2,9 +2,14 @@ package management;
 
 import tasks.Status;
 import tasks.Epic;
+import tasks.Task;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
+
         TaskManager taskManager = new Managers().getDefault();
         //Добавляем две задачи
         taskManager.addNewTask("First Task", "Task No.1 lorem ipsum", Status.NEW);
@@ -47,8 +52,12 @@ public class Main {
         //Проверяем, что при удалении Эпика пропадают из истории и его подзадачи
         System.out.println(taskManager.getTask(5));
         System.out.println(taskManager.getTask(6));
+
+
+        System.out.println("Вот история");
         System.out.println(taskManager.getHistory());
         taskManager.deleteTaskByID(3);
+        System.out.println("Вот история");
         System.out.println(taskManager.getHistory());
 
 

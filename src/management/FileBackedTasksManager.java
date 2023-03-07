@@ -3,11 +3,13 @@ package management;
 import tasks.*;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
     private void save (){
         try {
-            FileWriter writer = new FileWriter("/Users/artur/tmp/csv/sto1.csv");
+            FileWriter writer = new FileWriter("SavedTasks.csv");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -26,29 +28,59 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
         return fileBackedTasksManager;
     }
-//блять я все делал неправильно, не надо использовать AddNewTask. Надо просто записывать таски как они есть из файла.
+
     Task fromString(String value){
-        String[] taskFields = value.split(",");
-        TaskType importedTaskType = TaskType.valueOf(taskFields[1]);
-        Status importedTaskStatus = Status.valueOf(taskFields[3]);
-        try{
-            if(importedTaskType==TaskType.TASK){
-                return addNewTask(taskFields[2], taskFields[4], importedTaskStatus);
-            } else if (importedTaskType==TaskType.EPIC) {
-                return addNewEpic(taskFields[2], taskFields[4]);
-            } else if (importedTaskType==TaskType.SUBTASK) {
-                return addNewSubtask(getTask(taskFields[5]),taskFields[2],importedTaskStatus);
-            }
+
+        try {
+            String[] taskFields = value.split(",");
             int importedTaskID = Integer.parseInt(taskFields[0]);
-            return new Task(taskFields[2], taskFields[4], importedTaskID, importedTaskStatus);
+            TaskType importedTaskType = TaskType.valueOf(taskFields[1]);
+            String importedTaskName = taskFields[2];
+            Status importedTaskStatus = Status.valueOf(taskFields[3]);
+            String importedTaskDescription = taskFields[4];
+            int importedEpicsID = 0;
+            if (taskFields.length == 6) {
+                importedEpicsID = Integer.parseInt(taskFields[5]);
+            }
+            if (importedTaskType == TaskType.TASK) {
+                return new tasks.Task(importedTaskName, importedTaskDescription, importedTaskID, importedTaskStatus);
+            } else if (importedTaskType == TaskType.EPIC) {
+                return new tasks.Epic(importedTaskName, importedTaskDescription, importedTaskID);
+            } else if (importedTaskType == TaskType.SUBTASK) {
+                return new tasks.Subtask(importedEpicsID, importedTaskName, importedTaskDescription, importedTaskID,
+                        importedTaskStatus);
+            } else {
+                System.out.println("Не удалось импортировать задачу!");
+                return null;
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка импорта задачи!");
         }
-        catch (NumberFormatException ex){
-            ex.printStackTrace();
-        }
-        System.out.println("Не удалось импортировать задачу!");
         return null;
     }
 
+    static String historyToString(HistoryManager manager) {
+        List<Task> history = manager.getHistory();
+        List<Integer> IDsFromHistory = new ArrayList<>();
+        for (Task task : history) {
+            IDsFromHistory.add(task.getId());
+        }
+        return String.join("," + IDsFromHistory);
+    }
+
+    static List<Integer> historyFromString(String value){
+        String[] split = value.split(",");
+        List<Integer> history = new ArrayList<>();
+        for (String s : split) {
+            try {
+                history.add(Integer.parseInt(s));
+            } catch (NumberFormatException ex) {
+                System.out.println("Не удалось распознать номер задачи из строки!");
+                ex.printStackTrace();
+            }
+        }
+        return history;
+    }
 
     @Override
     public void deleteAllTasks() {
