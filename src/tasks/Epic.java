@@ -9,6 +9,10 @@ public class Epic extends Task{
         super(title, description, id);
         taskType = TaskType.EPIC;
     }
+    public Epic(String title, String description, int id, Status status){
+        super(title, description, id, status);
+        taskType = TaskType.EPIC;
+    }
 
     public void addSubtaskToSubtasksList(Subtask subtask){
         if(!subtasksIDsList.contains(subtask.getId())){

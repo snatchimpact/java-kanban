@@ -48,7 +48,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return id + "," + taskType + "," + title + "," + status + "," + description;
+        return id + "," + taskType + "," + title + "," + status + "," + description + ",\n";
     }
 //    public Task fromString(String value){
 //        String[] taskFields = value.split(",");

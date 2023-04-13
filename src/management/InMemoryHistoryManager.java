@@ -104,4 +104,25 @@ public class InMemoryHistoryManager implements HistoryManager {
         return customLinkedList.getTasks();
     }
 
+//    @Override
+//    public String toString(){
+//        return customLinkedList.toString();
+//    }
+
+    @Override
+    public String toString() {
+        List<Task> taskList = getHistory();
+        if(taskList == null){
+            return null;
+        } else {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < taskList.size(); i++) {
+                builder.append(taskList.get(i).getId());
+                if (i < taskList.size() - 1) {
+                    builder.append(",");
+                }
+            }
+            return builder.toString();
+        }
+    }
 }
