@@ -1,4 +1,4 @@
-package management;
+package utilities;
 //Класс, описывающий узел истории просмотра задач
 public class Node<Task>{
     public Task task;

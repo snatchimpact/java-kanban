@@ -12,7 +12,7 @@ import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
     int idCounter = 0;
-    HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
+    public HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
     public HashMap<Integer, Task> tasksContainer = new HashMap<>();
     public HashMap<Integer, Epic> epicsContainer = new HashMap<>();
     public HashMap<Integer, Subtask> subtasksContainer = new HashMap<>();

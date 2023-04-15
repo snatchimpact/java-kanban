@@ -7,7 +7,7 @@ public class Task {
     protected String description;
     protected int id;
     protected Status status = Status.NEW;
-    protected TaskType taskType = TaskType.TASK;
+    protected Type type = Type.TASK;
 
 
     public Task(String title, String description, int id, Status status) {
@@ -48,7 +48,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return id + "," + taskType + "," + title + "," + status + "," + description + ",\n";
+        return id + "," + type + "," + title + "," + status + "," + description + ",\n";
     }
 //    public Task fromString(String value){
 //        String[] taskFields = value.split(",");

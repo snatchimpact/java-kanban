@@ -1,5 +1,6 @@
 package management;
 
+import exceptions.ManagerSaveException;
 import tasks.*;
 
 import java.io.*;
@@ -9,66 +10,10 @@ import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    public static void main(String[] args){
-
-        //Эта часть - чтоб из файла создавать менеджер
-        File ourFile = new File("file.txt");
-        FileBackedTasksManager fileBackedTasksManager = loadFromFile(ourFile);
-        System.out.println(fileBackedTasksManager);
-        System.out.println(fileBackedTasksManager.inMemoryHistoryManager);
-
-        //Эта часть - чтоб перезаписывать файл, создавая операции
-
-        /*FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(ourFile);
-        fileBackedTasksManager.addNewTask("First Task", "Task No.1 lorem ipsum", Status.NEW);
-        fileBackedTasksManager.addNewTask("Second Task", "Task No.2 lorem ipsum", Status.IN_PROGRESS);
-        Epic epic1 = fileBackedTasksManager.addNewEpic("First Epic", "Epic No.1 Lorem ipsum");
-        fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's First Subtask",
-                "1st Epic's 1st Subtask Lorem ipsum",
-                Status.NEW);
-        fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's Second Subtask",
-                "1st Epic's 2nd Subtask Lorem ipsum",
-                Status.IN_PROGRESS);
-        fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's Third Subtask",
-                "1st Epic's 3rd Subtask Lorem ipsum",
-                Status.DONE);
-        //Добавляем второй Эпик - без подзадач
-        fileBackedTasksManager.addNewEpic("Second Epic", "Epic No.2 Lorem ipsum");
-
-        //Запрашиваем созданные задачи в разном порядке
-        System.out.println(fileBackedTasksManager.getTask(1));
-        System.out.println(fileBackedTasksManager.getHistory());
-        System.out.println(fileBackedTasksManager.getTask(2));
-        System.out.println(fileBackedTasksManager.getHistory());
-        System.out.println(fileBackedTasksManager.getTask(3));
-        System.out.println(fileBackedTasksManager.getHistory());
-        System.out.println(fileBackedTasksManager.getTask(4));
-        System.out.println(fileBackedTasksManager.getHistory());
-        System.out.println(fileBackedTasksManager.getTask(4));
-        System.out.println(fileBackedTasksManager.getHistory());
-        System.out.println(fileBackedTasksManager.getTask(3));
-        System.out.println(fileBackedTasksManager.getHistory());
-
-        System.out.println("beg");
-        System.out.println(historyToString(fileBackedTasksManager.inMemoryHistoryManager));
-        System.out.println("end");*/
+    private File file;
 
 
-    }
 
-    File file;
-
-
-    public static class ManagerSaveException extends RuntimeException {
-
-        public ManagerSaveException(final Throwable cause) {
-            super(cause);
-        }
-    }
-    //Конструктор, чтобы начинать работу со чтения файла
-    public FileBackedTasksManager(File file) {
-        this.file = file;
-    }
 
     private void save () throws ManagerSaveException {
         try {
@@ -98,7 +43,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 fileWriter.close();
             }
         } catch (IOException e) {
-            throw new ManagerSaveException(e);
+            throw new ManagerSaveException("Проблема сохранения файла!");
         }
     }
 
@@ -116,8 +61,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     //Статический метод для чтения менеджера из файла
-    static FileBackedTasksManager loadFromFile(File file){
-        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
+    public static FileBackedTasksManager loadFromFile(File file){
+        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager();
         ArrayList<String> lines = new ArrayList<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
@@ -141,14 +86,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 } else {
                     //Проверяем, какой тип задачи создавать, чтоб правильно сложить
                     String[] taskFields = lines.get(i).split(",");
-                    TaskType importedTaskType = TaskType.valueOf(taskFields[1]);
+                    Type importedTaskType = Type.valueOf(taskFields[1]);
                     Task task = fromString(lines.get(i));
-                    if (importedTaskType == TaskType.TASK){
+                    if (importedTaskType == Type.TASK){
                         fileBackedTasksManager.tasksContainer.put(Integer.parseInt(taskFields[0]), task);
-                    } else if (importedTaskType == TaskType.SUBTASK) {
+                    } else if (importedTaskType == Type.SUBTASK) {
                         fileBackedTasksManager.subtasksContainer.put(Integer.parseInt(taskFields[0]), (Subtask) task);
                     }
-                    else if (importedTaskType == TaskType.EPIC) {
+                    else if (importedTaskType == Type.EPIC) {
                         fileBackedTasksManager.epicsContainer.put(Integer.parseInt(taskFields[0]), (Epic) task);
                     }
 
@@ -186,7 +131,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         try {
             String[] taskFields = value.split(",");
             int importedTaskID = Integer.parseInt(taskFields[0]);
-            TaskType importedTaskType = TaskType.valueOf(taskFields[1]);
+            Type importedTaskType = Type.valueOf(taskFields[1]);
             String importedTaskName = taskFields[2];
             Status importedTaskStatus = Status.valueOf(taskFields[3]);
             String importedTaskDescription = taskFields[4];
@@ -194,11 +139,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             if (taskFields.length == 6) {
                 importedEpicsID = Integer.parseInt(taskFields[5]);
             }
-            if (importedTaskType == TaskType.TASK) {
+            if (importedTaskType == Type.TASK) {
                 return new tasks.Task(importedTaskName, importedTaskDescription, importedTaskID, importedTaskStatus);
-            } else if (importedTaskType == TaskType.EPIC) {
+            } else if (importedTaskType == Type.EPIC) {
                 return new tasks.Epic(importedTaskName, importedTaskDescription, importedTaskID, importedTaskStatus);
-            } else if (importedTaskType == TaskType.SUBTASK) {
+            } else if (importedTaskType == Type.SUBTASK) {
                 return new tasks.Subtask(importedEpicsID, importedTaskName, importedTaskDescription, importedTaskID,
                         importedTaskStatus);
             } else {
