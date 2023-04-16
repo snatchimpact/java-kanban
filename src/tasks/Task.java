@@ -35,34 +35,12 @@ public class Task {
         this.status = status;
     }
 
-    //Сохраним старый toString на всякий случай
-//    @Override
-//    public String toString() {
-//        return "Task{" +
-//                "title='" + title + '\'' +
-//                ", description='" + description + '\'' +
-//                ", id=" + id +
-//                ", Status='" + status + '\'' +
-//                '}';
-//    }
 
     @Override
     public String toString() {
         return id + "," + type + "," + title + "," + status + "," + description + ",\n";
     }
-//    public Task fromString(String value){
-//        String[] taskFields = value.split(",");
-//        try{
-//            int importedTasksID = Integer.parseInt(taskFields[0]);
-//            Status importedTasksStatus = Status.valueOf(taskFields[3]);
-//            return new Task(taskFields[2], taskFields[4], importedTasksID, importedTasksStatus);
-//        }
-//        catch (NumberFormatException ex){
-//            ex.printStackTrace();
-//        }
-//        System.out.println("Не удалось импортировать задачу!");
-//        return null;
-//    }
+
 
     @Override
     public int hashCode() {

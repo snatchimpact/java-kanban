@@ -23,17 +23,6 @@ public class Subtask extends Task {
     public String toString(){
         return id + "," + type + "," + title + "," + status + "," + description + "," + epicID + "\n";
     }
-//    public Subtask fromString(String value){
-//        String[] subtaskFields = value.split(",");
-//        try{
-//            int importedSubtasksID = Integer.parseInt(subtaskFields[0]);
-//            return new Subtask(subtaskFields[2], subtaskFields[4], importedSubtasksID);
-//        }
-//        catch (NumberFormatException ex){
-//            ex.printStackTrace();
-//        }
-//        System.out.println("Не удалось импортировать задачу!");
-//        return null;
-//    }
+
 }
 

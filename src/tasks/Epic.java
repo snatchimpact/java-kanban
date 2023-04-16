@@ -32,16 +32,4 @@ public class Epic extends Task{
         subtasksIDsList.remove(subtaskID);
     }
 
-//    public Epic fromString(String value){
-//        String[] epicFields = value.split(",");
-//        try{
-//            int importedEpicsID = Integer.parseInt(epicFields[0]);
-//            return new Epic(epicFields[2], epicFields[4], importedEpicsID);
-//        }
-//        catch (NumberFormatException ex){
-//            ex.printStackTrace();
-//        }
-//        System.out.println("Не удалось импортировать задачу!");
-//        return null;
-//    }
 }

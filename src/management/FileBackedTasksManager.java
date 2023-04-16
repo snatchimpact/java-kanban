@@ -12,7 +12,54 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private File file;
 
+    public FileBackedTasksManager(File ourFile) {
+        file = ourFile;
+    }
+    public FileBackedTasksManager() {
+    }
 
+    public static void main(String[] args){
+        //Идём по пунктам ТЗ "Проверка работы нового менджера"
+        //"1.	Заведите несколько разных задач, эпиков и подзадач."
+        File ourFile = new File("file.txt");
+        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(ourFile);
+        fileBackedTasksManager.addNewTask("First Task", "Task No.1 lorem ipsum", Status.NEW);
+        fileBackedTasksManager.addNewTask("Second Task", "Task No.2 lorem ipsum", Status.IN_PROGRESS);
+        Epic epic1 = fileBackedTasksManager.addNewEpic("First Epic", "Epic No.1 Lorem ipsum");
+        fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's First Subtask",
+                "1st Epic's 1st Subtask Lorem ipsum",
+                Status.NEW);
+        fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's Second Subtask",
+                "1st Epic's 2nd Subtask Lorem ipsum",
+                Status.IN_PROGRESS);
+        fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's Third Subtask",
+                "1st Epic's 3rd Subtask Lorem ipsum",
+                Status.DONE);
+        fileBackedTasksManager.addNewEpic("Second Epic", "Epic No.2 Lorem ipsum");
+
+        //2.	Запросите некоторые из них, чтобы заполнилась история просмотра.
+        System.out.println(fileBackedTasksManager.getTask(1));
+        System.out.println(fileBackedTasksManager.getHistory());
+        System.out.println(fileBackedTasksManager.getTask(2));
+        System.out.println(fileBackedTasksManager.getHistory());
+        System.out.println(fileBackedTasksManager.getTask(3));
+        System.out.println(fileBackedTasksManager.getHistory());
+        System.out.println(fileBackedTasksManager.getTask(4));
+        System.out.println(fileBackedTasksManager.getHistory());
+        System.out.println(fileBackedTasksManager.getTask(4));
+        System.out.println(fileBackedTasksManager.getHistory());
+        System.out.println(fileBackedTasksManager.getTask(3));
+        System.out.println(fileBackedTasksManager.getHistory());
+
+        //3.	Создайте новый FileBackedTasksManager менеджер из этого же файла.
+
+        FileBackedTasksManager restoredFileBackedTasksManager = loadFromFile(ourFile);
+
+        //4.	Проверьте, что история просмотра восстановилась верно и все задачи, эпики, подзадачи, которые были
+        // в старом, есть в новом менеджере.
+        System.out.println(restoredFileBackedTasksManager);
+        System.out.println(restoredFileBackedTasksManager.inMemoryHistoryManager);
+    }
 
 
     private void save () throws ManagerSaveException {
