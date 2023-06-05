@@ -8,21 +8,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class FileBackedTasksManager extends InMemoryTaskManager {
+public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private File file;
 
-    public FileBackedTasksManager(File ourFile) {
+    public FileBackedTaskManager(File ourFile) {
         file = ourFile;
     }
-    public FileBackedTasksManager() {
+    public FileBackedTaskManager() {
     }
 
     public static void main(String[] args){
         //Идём по пунктам ТЗ "Проверка работы нового менджера"
         //"1.	Заведите несколько разных задач, эпиков и подзадач."
         File ourFile = new File("file.txt");
-        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(ourFile);
+        FileBackedTaskManager fileBackedTasksManager = new FileBackedTaskManager(ourFile);
         fileBackedTasksManager.addNewTask("First Task", "Task No.1 lorem ipsum", Status.NEW);
         fileBackedTasksManager.addNewTask("Second Task", "Task No.2 lorem ipsum", Status.IN_PROGRESS);
         Epic epic1 = fileBackedTasksManager.addNewEpic("First Epic", "Epic No.1 Lorem ipsum");
@@ -53,7 +53,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         //3.	Создайте новый FileBackedTasksManager менеджер из этого же файла.
 
-        FileBackedTasksManager restoredFileBackedTasksManager = loadFromFile(ourFile);
+        FileBackedTaskManager restoredFileBackedTasksManager = loadFromFile(ourFile);
 
         //4.	Проверьте, что история просмотра восстановилась верно и все задачи, эпики, подзадачи, которые были
         // в старом, есть в новом менеджере.
@@ -108,8 +108,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     //Статический метод для чтения менеджера из файла
-    public static FileBackedTasksManager loadFromFile(File file){
-        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager();
+    public static FileBackedTaskManager loadFromFile(File file){
+        FileBackedTaskManager fileBackedTasksManager = new FileBackedTaskManager();
         ArrayList<String> lines = new ArrayList<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));

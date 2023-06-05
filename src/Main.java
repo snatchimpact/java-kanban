@@ -1,20 +1,15 @@
-import management.FileBackedTasksManager;
-import tasks.Status;
-import tasks.Epic;
-import tasks.Task;
+import management.FileBackedTaskManager;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
-import static management.FileBackedTasksManager.loadFromFile;
+import static management.FileBackedTaskManager.loadFromFile;
 
 public class Main {
     public static void main(String[] args){
 
         //Эта часть - чтоб из файла создавать менеджер
         File ourFile = new File("file.txt");
-        FileBackedTasksManager fileBackedTasksManager = loadFromFile(ourFile);
+        FileBackedTaskManager fileBackedTasksManager = loadFromFile(ourFile);
         System.out.println(fileBackedTasksManager);
         System.out.println(fileBackedTasksManager.inMemoryHistoryManager);
 
