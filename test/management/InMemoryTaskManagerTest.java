@@ -8,5 +8,4 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
     void startTheProcess() {
         manager = new InMemoryTaskManager();
     }
-
 }

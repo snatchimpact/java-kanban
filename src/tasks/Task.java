@@ -1,5 +1,7 @@
 package tasks;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
 
 public class Task {
@@ -8,7 +10,8 @@ public class Task {
     protected int id;
     protected Status status = Status.NEW;
     protected Type type = Type.TASK;
-
+    protected Duration duration;
+    protected Instant startTime;
 
     public Task(String title, String description, int id, Status status) {
         this.title = title;

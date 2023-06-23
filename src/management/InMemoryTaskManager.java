@@ -199,7 +199,8 @@ public class InMemoryTaskManager implements TaskManager {
         ArrayList<Integer> subtasksIDsList = epic.getSubtasksIDsList();
         boolean doAllSubtasksHaveSameStatus = true;
         for (int subtaskID : subtasksIDsList) {
-            if (!subtasksContainer.get(subtaskID).getStatus().equals(subtasksContainer.get(subtasksIDsList.get(0)).getStatus())) {
+            if (!subtasksContainer.get(subtaskID).getStatus().equals(subtasksContainer.get(subtasksIDsList.
+                    get(0)).getStatus())) {
                 doAllSubtasksHaveSameStatus = false;
             }
         }

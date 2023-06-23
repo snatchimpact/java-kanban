@@ -16,6 +16,11 @@ import java.util.Set;
 abstract class TaskManagerTest <T extends TaskManager>{
     T manager;
 
+    @Test
+    void mustReturnEmptyHistory(){
+        System.out.println(manager.getHistory());
+        Assertions.assertNull(manager.getHistory(), "История у свежесозданного manager - не нулевая!");
+    }
 
     @Test
     void mustAddTaskToTheContainer(){
@@ -28,7 +33,8 @@ abstract class TaskManagerTest <T extends TaskManager>{
     @Test
     void emptyEpicMustHaveNoSubtasks(){
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
-        Assertions.assertTrue(epic1.getSubtasksIDsList().isEmpty(), "У нового пустого эпика не должно быть подзадач!");
+        Assertions.assertTrue(epic1.getSubtasksIDsList().isEmpty(), "У нового пустого эпика не должно быть " +
+                "подзадач!");
     }
 
     @Test
@@ -94,7 +100,6 @@ abstract class TaskManagerTest <T extends TaskManager>{
                 "не 2!");
         Assertions.assertEquals(plus2,3,"Счетчик ID-шников задач, вызываясь третий раз, дает номер " +
                 "не 3!");
-
     }
 
     @Test
@@ -102,11 +107,14 @@ abstract class TaskManagerTest <T extends TaskManager>{
         List<Integer> listOfTestTasks = new ArrayList<>();
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
         listOfTestTasks.add(epic1.getId());
-        Subtask subtask1 = manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW);
+        Subtask subtask1 = manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1",
+                Status.NEW);
         listOfTestTasks.add(subtask1.getId());
-        Subtask subtask2 = manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE);
+        Subtask subtask2 = manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2",
+                Status.DONE);
         listOfTestTasks.add(subtask2.getId());
-        Subtask subtask3 = manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.DONE);
+        Subtask subtask3 = manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3",
+                Status.DONE);
         listOfTestTasks.add(subtask3.getId());
         Epic epic2 = manager.addNewEpic("TestEpic2", "TestEpicDescription2");
         listOfTestTasks.add(epic2.getId());
@@ -146,14 +154,18 @@ abstract class TaskManagerTest <T extends TaskManager>{
     void listOfAllSubtasksMustReturnAllSubtasks() {
         List<Integer> listOfTestSubtasks = new ArrayList<>();
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
-        Subtask subtask1 = manager.addNewSubtask(epic1, "TestSubtask1", "TestSubtaskDescription1", Status.NEW);
+        Subtask subtask1 = manager.addNewSubtask(epic1, "TestSubtask1", "TestSubtaskDescription1",
+                Status.NEW);
         listOfTestSubtasks.add(subtask1.getId());
-        Subtask subtask2 = manager.addNewSubtask(epic1, "TestSubtask2", "TestSubtaskDescription2", Status.DONE);
+        Subtask subtask2 = manager.addNewSubtask(epic1, "TestSubtask2", "TestSubtaskDescription2",
+                Status.DONE);
         listOfTestSubtasks.add(subtask2.getId());
-        Subtask subtask3 = manager.addNewSubtask(epic1, "TestSubtask3", "TestSubtaskDescription3", Status.DONE);
+        Subtask subtask3 = manager.addNewSubtask(epic1, "TestSubtask3", "TestSubtaskDescription3",
+                Status.DONE);
         listOfTestSubtasks.add(subtask3.getId());
         Epic epic2 = manager.addNewEpic("TestEpic2", "TestEpicDescription2");
-        Subtask subtask4 = manager.addNewSubtask(epic2, "TestSubtask4", "TestSubtaskDescription4", Status.IN_PROGRESS);
+        Subtask subtask4 = manager.addNewSubtask(epic2, "TestSubtask4", "TestSubtaskDescription4",
+                Status.IN_PROGRESS);
         listOfTestSubtasks.add(subtask4.getId());
 
         Set<Integer> setOfTestSubtasks = new HashSet<>(listOfTestSubtasks);
@@ -183,11 +195,7 @@ abstract class TaskManagerTest <T extends TaskManager>{
     Assertions.assertEquals(listOfViewedTasks, manager.getHistory());
 }
 
-    @Test
-    void mustReturnEmptyHistory(){
-        Assertions.assertNull(manager.getHistory());
 
-    }
 
     @Test
     void mustAddTask(){
@@ -207,7 +215,8 @@ abstract class TaskManagerTest <T extends TaskManager>{
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
         manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW);
         manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE);
-        Subtask subtask3 = manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.IN_PROGRESS);
+        Subtask subtask3 = manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3",
+                Status.IN_PROGRESS);
         Assertions.assertEquals(subtask3, manager.getTask(4));
         Assertions.assertNotEquals(subtask3, manager.getTask(3));
         Assertions.assertNotEquals(subtask3, manager.getTask(2));
@@ -240,11 +249,12 @@ abstract class TaskManagerTest <T extends TaskManager>{
     @Test
     void mustChangeSubtask(){
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
-        Subtask subtask1 = manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW);
+        Subtask subtask1 = manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1",
+                Status.NEW);
         manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE);
         manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.IN_PROGRESS);
-        Subtask subtask1Changed = new Subtask(epic1,"Subtask1Changed", "TestSubtaskDescription1Changed", 2,
-                Status.DONE);
+        Subtask subtask1Changed = new Subtask(epic1,"Subtask1Changed", "TestSubtaskDescription1Changed",
+                2, Status.DONE);
         manager.changeSubtask(subtask1Changed);
         Assertions.assertEquals(subtask1Changed,manager.getTask(2));
         Assertions.assertNotEquals(subtask1, manager.getTask(2));

@@ -153,13 +153,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 List<Integer> listHistoryFromString = historyFromString(lines.get(lines.size() - 1));
                 for (Integer taskNumber : listHistoryFromString){
                     if(fileBackedTasksManager.tasksContainer.containsKey(taskNumber)){
-                        fileBackedTasksManager.inMemoryHistoryManager.add(fileBackedTasksManager.tasksContainer.get(taskNumber));
+                        fileBackedTasksManager.inMemoryHistoryManager.add(fileBackedTasksManager.
+                                tasksContainer.get(taskNumber));
                     }
                     else if (fileBackedTasksManager.epicsContainer.containsKey(taskNumber)){
-                        fileBackedTasksManager.inMemoryHistoryManager.add(fileBackedTasksManager.epicsContainer.get(taskNumber));
+                        fileBackedTasksManager.inMemoryHistoryManager.add(fileBackedTasksManager.
+                                epicsContainer.get(taskNumber));
                     }
                     else if (fileBackedTasksManager.subtasksContainer.containsKey(taskNumber)){
-                        fileBackedTasksManager.inMemoryHistoryManager.add(fileBackedTasksManager.subtasksContainer.get(taskNumber));
+                        fileBackedTasksManager.inMemoryHistoryManager.add(fileBackedTasksManager.
+                                subtasksContainer.get(taskNumber));
                     }
                     else {
                         System.out.println("Какая-то странная ситуация: пытаемся восстановить в истории задачу, " +
