@@ -5,6 +5,8 @@ import tasks.Status;
 import tasks.Subtask;
 import tasks.Task;
 
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,13 +50,18 @@ public interface TaskManager {
 
     void deleteTaskByID (int taskNumber);
 
-    Task addNewTask(String tasksTitle, String description, Status status);
+    Task addNewTask(String tasksTitle, String description, Status status, Duration duration, LocalTime localTime);
 
     Epic addNewEpic(String epicsTitle, String description);
 
-    Subtask addNewSubtask(Epic epic, String subtasksTitle, String description, Status status);
+    Subtask addNewSubtask(Epic epic, String subtasksTitle, String description, Status status, Duration duration,
+                          LocalTime localTime);
 
     Status deduceEpicsStatus(Epic epic);
+
+    Duration deduceEpicsDuration(Epic epic);
+    LocalTime deduceEpicsStartTime(Epic epic);
+    LocalTime deduceEpicsEndTime(Epic epic);
 
     boolean checkIfAllSubtasksHaveSameStatus (Epic epic);
 

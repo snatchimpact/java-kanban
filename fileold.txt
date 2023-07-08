@@ -1,0 +1,10 @@
+id,type,name,status,description,epic
+1,TASK,First Task,NEW,Task No.1 lorem ipsum,
+2,TASK,Second Task,IN_PROGRESS,Task No.2 lorem ipsum,
+3,EPIC,First Epic,IN_PROGRESS,Epic No.1 Lorem ipsum,
+7,EPIC,Second Epic,NEW,Epic No.2 Lorem ipsum,
+4,SUBTASK,1st Epic's First Subtask,NEW,1st Epic's 1st Subtask Lorem ipsum,3
+5,SUBTASK,1st Epic's Second Subtask,IN_PROGRESS,1st Epic's 2nd Subtask Lorem ipsum,3
+6,SUBTASK,1st Epic's Third Subtask,DONE,1st Epic's 3rd Subtask Lorem ipsum,3
+
+1,2,4,3

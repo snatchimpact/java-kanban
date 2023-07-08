@@ -4,9 +4,12 @@ import exceptions.ManagerSaveException;
 import tasks.*;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
@@ -23,18 +26,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         //"1.	Заведите несколько разных задач, эпиков и подзадач."
         File ourFile = new File("file.txt");
         FileBackedTaskManager fileBackedTasksManager = new FileBackedTaskManager(ourFile);
-        fileBackedTasksManager.addNewTask("First Task", "Task No.1 lorem ipsum", Status.NEW);
-        fileBackedTasksManager.addNewTask("Second Task", "Task No.2 lorem ipsum", Status.IN_PROGRESS);
+        fileBackedTasksManager.addNewTask("First Task", "Task No.1 lorem ipsum", Status.NEW,
+                Duration.ofHours(1), LocalTime.of(1, 48, 0));
+//        fileBackedTasksManager.addNewTask("Second Task", "Task No.2 lorem ipsum", Status.IN_PROGRESS);
         Epic epic1 = fileBackedTasksManager.addNewEpic("First Epic", "Epic No.1 Lorem ipsum");
         fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's First Subtask",
                 "1st Epic's 1st Subtask Lorem ipsum",
-                Status.NEW);
+                Status.NEW, Duration.ofHours(1), LocalTime.of(1, 48, 0));
         fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's Second Subtask",
                 "1st Epic's 2nd Subtask Lorem ipsum",
-                Status.IN_PROGRESS);
+                Status.IN_PROGRESS, Duration.ofHours(2), LocalTime.of(2, 48, 0));
         fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's Third Subtask",
                 "1st Epic's 3rd Subtask Lorem ipsum",
-                Status.DONE);
+                Status.DONE, Duration.ofHours(3), LocalTime.of(3, 48, 0));
         fileBackedTasksManager.addNewEpic("Second Epic", "Epic No.2 Lorem ipsum");
 
         //2.	Запросите некоторые из них, чтобы заполнилась история просмотра.
@@ -57,7 +61,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         //4.	Проверьте, что история просмотра восстановилась верно и все задачи, эпики, подзадачи, которые были
         // в старом, есть в новом менеджере.
+        System.out.println("Печатаем изначальный менеджер");
+        System.out.println(fileBackedTasksManager);
+        System.out.println("Печатаем восстановленный менеджер");
         System.out.println(restoredFileBackedTasksManager);
+        System.out.println("Печатаем изначальный хистори менеджер");
+        System.out.println(fileBackedTasksManager.inMemoryHistoryManager);
+        System.out.println("Печатаем восстановленный хистори менеджер");
         System.out.println(restoredFileBackedTasksManager.inMemoryHistoryManager);
     }
 
@@ -69,7 +79,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 System.out.println("Старый файл удалить не удалось");
             }
             FileWriter fileWriter = new FileWriter(file);
-            fileWriter.write("id,type,name,status,description,epic\n");
+            fileWriter.write("id,type,name,status,description,startTime,duration,endTime,epic\n");
             HashMap<Integer, Task> allTasks = getAllTasks();
             for (Task i : allTasks.values()){
                 fileWriter.write(String.valueOf(i));
@@ -86,7 +96,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             if (historyToString(inMemoryHistoryManager) == null){
                 fileWriter.close();
             } else {
-                fileWriter.write(historyToString(inMemoryHistoryManager));
+                fileWriter.write(Objects.requireNonNull(historyToString(inMemoryHistoryManager)));
                 fileWriter.close();
             }
         } catch (IOException e) {
@@ -110,6 +120,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     //Статический метод для чтения менеджера из файла
     public static FileBackedTaskManager loadFromFile(File file){
         FileBackedTaskManager fileBackedTasksManager = new FileBackedTaskManager();
+        fileBackedTasksManager.idCounter = 0;
         ArrayList<String> lines = new ArrayList<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
@@ -144,6 +155,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                         fileBackedTasksManager.epicsContainer.put(Integer.parseInt(taskFields[0]), (Epic) task);
                     }
 
+                    if(Integer.parseInt(taskFields[0]) > fileBackedTasksManager.idCounter){
+                        fileBackedTasksManager.idCounter = Integer.parseInt(taskFields[0]);
+                    }
                 }
             }
             //Проверяем, не пуста ли последняя строка
@@ -182,20 +196,44 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             String[] taskFields = value.split(",");
             int importedTaskID = Integer.parseInt(taskFields[0]);
             Type importedTaskType = Type.valueOf(taskFields[1]);
-            String importedTaskName = taskFields[2];
+            String importedTaskTitle = taskFields[2];
             Status importedTaskStatus = Status.valueOf(taskFields[3]);
             String importedTaskDescription = taskFields[4];
+
+            Duration importedTaskDuration;
+            if(!taskFields[5].equals("null")) {
+                importedTaskDuration = Duration.parse(taskFields[5]);
+            } else {
+                importedTaskDuration = null;
+            }
+
+            LocalTime importedStartTime;
+            if(!taskFields[6].equals("null")) {
+                importedStartTime = LocalTime.parse(taskFields[6]);
+            } else {
+                importedStartTime = null;
+            }
+
+            LocalTime importedEndTime;
+            if(!taskFields[7].equals("null")) {
+                importedEndTime = LocalTime.parse(taskFields[7]);
+            } else {
+                importedEndTime = null;
+            }
+
             int importedEpicsID = 0;
-            if (taskFields.length == 6) {
-                importedEpicsID = Integer.parseInt(taskFields[5]);
+            if (taskFields.length == 9) {
+                importedEpicsID = Integer.parseInt(taskFields[8]);
             }
             if (importedTaskType == Type.TASK) {
-                return new tasks.Task(importedTaskName, importedTaskDescription, importedTaskID, importedTaskStatus);
+                return new tasks.Task(importedTaskTitle, importedTaskDescription, importedTaskID, importedTaskStatus,
+                        importedTaskDuration, importedStartTime);
             } else if (importedTaskType == Type.EPIC) {
-                return new tasks.Epic(importedTaskName, importedTaskDescription, importedTaskID, importedTaskStatus);
+                return new tasks.Epic(importedTaskTitle, importedTaskDescription, importedTaskID, importedTaskStatus,
+                        importedTaskDuration, importedStartTime, importedEndTime);
             } else if (importedTaskType == Type.SUBTASK) {
-                return new tasks.Subtask(importedEpicsID, importedTaskName, importedTaskDescription, importedTaskID,
-                        importedTaskStatus);
+                return new tasks.Subtask(importedEpicsID, importedTaskTitle, importedTaskDescription, importedTaskID,
+                        importedTaskStatus, importedTaskDuration, importedStartTime);
             } else {
                 System.out.println("Не удалось импортировать задачу!");
                 return null;
@@ -301,8 +339,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Task addNewTask(String tasksTitle, String description, Status status) {
-        Task task = super.addNewTask(tasksTitle, description, status);
+    public Task addNewTask(String tasksTitle, String description, Status status, Duration duration,
+                           LocalTime localTime) {
+        Task task = super.addNewTask(tasksTitle, description, status, duration, localTime);
         save();
         return task;
     }
@@ -315,8 +354,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Subtask addNewSubtask(Epic epic, String subtasksTitle, String description, Status status) {
-        Subtask subtask = super.addNewSubtask(epic,subtasksTitle,description,status);
+    public Subtask addNewSubtask(Epic epic, String subtasksTitle, String description, Status status, Duration duration,
+                                 LocalTime localTime) {
+        Subtask subtask = super.addNewSubtask(epic,subtasksTitle,description,status, duration, localTime);
         save();
         return subtask;
     }

@@ -9,6 +9,8 @@ import tasks.Status;
 import tasks.Subtask;
 import tasks.Task;
 
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,12 +28,17 @@ class HistoryManagerTest {
     @BeforeEach
     public void prepareHistoryManagerTest() {
         epic1 = new Epic("TestEpic1", "TestEpicDescription1",1);
-        subtask1 = new Subtask(epic1, "TestSubtask1", "TestSubtaskDescription1", 2, Status.NEW);
-        subtask2 = new Subtask(epic1, "TestSubtask2", "TestSubtaskDescription2", 3, Status.DONE);
-        subtask3 = new Subtask(epic1, "TestSubtask3", "TestSubtaskDescription3", 4, Status.DONE);
+        subtask1 = new Subtask(epic1, "TestSubtask1", "TestSubtaskDescription1", 2, Status.NEW,
+                Duration.ofHours(1), LocalTime.of(1, 1, 0));
+        subtask2 = new Subtask(epic1, "TestSubtask2", "TestSubtaskDescription2", 3, Status.DONE,
+                Duration.ofHours(2), LocalTime.of(2, 1, 0));
+        subtask3 = new Subtask(epic1, "TestSubtask3", "TestSubtaskDescription3", 4, Status.DONE,
+                Duration.ofHours(3), LocalTime.of(3, 1, 0));
         epic2 = new Epic("TestEpic2", "TestEpicDescription2",5);
-        task1 = new Task("TestTask1", "TestTaskDescription1",6, Status.NEW);
-        task2 = new Task("TestTask2", "TestTaskDescription2", 7, Status.IN_PROGRESS);
+        task1 = new Task("TestTask1", "TestTaskDescription1",6, Status.NEW,
+                Duration.ofHours(4), LocalTime.of(4, 1, 0));
+        task2 = new Task("TestTask2", "TestTaskDescription2", 7, Status.IN_PROGRESS,
+                Duration.ofHours(5), LocalTime.of(5, 1, 0));
     }
 
     @AfterEach

@@ -7,6 +7,8 @@ import tasks.Status;
 import tasks.Subtask;
 import tasks.Task;
 
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -24,7 +26,8 @@ abstract class TaskManagerTest <T extends TaskManager>{
 
     @Test
     void mustAddTaskToTheContainer(){
-        Task task1 = manager.addNewTask("TestTask1","TestTaskDescription1", Status.NEW);
+        Task task1 = manager.addNewTask("TestTask1","TestTaskDescription1", Status.NEW,
+                Duration.ofHours(1), LocalTime.of(1, 1, 0));
         Task savedTask = manager.getTask(task1.getId());
         Assertions.assertNotNull(savedTask, "Задача не найдена!");
         Assertions.assertEquals(task1,savedTask,"Задачи не совпадают!");
@@ -46,27 +49,36 @@ abstract class TaskManagerTest <T extends TaskManager>{
     @Test
     void epicWithAllSubtasksInStatusNEWMustHaveStatusNEW(){
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
-        manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW);
-        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.NEW);
-        manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.NEW);
+        manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW,
+                Duration.ofHours(1), LocalTime.of(1, 1, 0));
+        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.NEW,
+                Duration.ofHours(2), LocalTime.of(2, 1, 0));
+        manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.NEW,
+                Duration.ofHours(3), LocalTime.of(3, 1, 0));
         Assertions.assertEquals(epic1.getStatus(), Status.NEW, "Эпик со всеми сабтасками NEW имеет " +
                 "статус не NEW!");
     }
     @Test
     void epicWithAllSubtasksInStatusDONEMustHaveStatusDONE(){
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
-        manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.DONE);
-        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE);
-        manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.DONE);
+        manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.DONE,
+                Duration.ofHours(1), LocalTime.of(1, 1, 0));
+        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE,
+                Duration.ofHours(2), LocalTime.of(2, 1, 0));
+        manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.DONE,
+                Duration.ofHours(3), LocalTime.of(3, 1, 0));
         Assertions.assertEquals(epic1.getStatus(), Status.DONE, "Эпик со всеми задачами DONE имеет " +
                 "статус не DONE!");
     }
     @Test
     void epicWithSubtasksInStatusDONEAndWithSubtasksInStatusNEWMustHaveStatusINPROGRESS(){
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
-        manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW);
-        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE);
-        manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.DONE);
+        manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW,
+                Duration.ofHours(1), LocalTime.of(1, 1, 0));
+        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE,
+                Duration.ofHours(2), LocalTime.of(2, 1, 0));
+        manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.DONE,
+                Duration.ofHours(3), LocalTime.of(3, 1, 0));
         Assertions.assertEquals(epic1.getStatus(), Status.IN_PROGRESS, "Эпик с " +
                 "задачами NEW, DONE, DONE имеет статус не IN_PROGRESS!");
     }
@@ -74,9 +86,12 @@ abstract class TaskManagerTest <T extends TaskManager>{
     @Test
     void epicWithSomeOrAllSubtasksInStatusIN_PROGRESMustHaveStatusIN_PROGRESS(){
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
-        manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.IN_PROGRESS);
-        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.IN_PROGRESS);
-        manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.IN_PROGRESS);
+        manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.IN_PROGRESS,
+        Duration.ofHours(1), LocalTime.of(1, 48, 0));
+        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.IN_PROGRESS,
+        Duration.ofHours(2), LocalTime.of(2, 48, 0));
+        manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.IN_PROGRESS,
+        Duration.ofHours(3), LocalTime.of(3, 48, 0));
         Assertions.assertEquals(epic1.getStatus(), Status.IN_PROGRESS,"Эпик с " +
                 "задачами IN_PROGRESS, IN_PROGRESS, IN_PROGRESS имеет статус не IN_PROGRESS!");
     }
@@ -85,7 +100,8 @@ abstract class TaskManagerTest <T extends TaskManager>{
     void savedSubtaskMustHaveEpic(){
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
         Subtask subtask1 = manager.addNewSubtask(epic1,"TestSubtask1",
-                "TestSubtaskDescription1", Status.IN_PROGRESS);
+                "TestSubtaskDescription1", Status.IN_PROGRESS,
+                Duration.ofHours(1), LocalTime.of(1, 48, 0));
         Assertions.assertEquals(epic1, manager.getTask(subtask1.getEpicID()),"По ID эпика, записанного в" +
                 " сабтаске, возвращается другой эпик!");
     }
@@ -108,19 +124,21 @@ abstract class TaskManagerTest <T extends TaskManager>{
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
         listOfTestTasks.add(epic1.getId());
         Subtask subtask1 = manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1",
-                Status.NEW);
+                Status.NEW, Duration.ofHours(1), LocalTime.of(1, 48, 0));
         listOfTestTasks.add(subtask1.getId());
         Subtask subtask2 = manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2",
-                Status.DONE);
+                Status.DONE, Duration.ofHours(2), LocalTime.of(2, 48, 0));
         listOfTestTasks.add(subtask2.getId());
         Subtask subtask3 = manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3",
-                Status.DONE);
+                Status.DONE, Duration.ofHours(3), LocalTime.of(3, 48, 0));
         listOfTestTasks.add(subtask3.getId());
         Epic epic2 = manager.addNewEpic("TestEpic2", "TestEpicDescription2");
         listOfTestTasks.add(epic2.getId());
-        Task task1 = manager.addNewTask("TestTask1","TestTaskDescription1",Status.NEW);
+        Task task1 = manager.addNewTask("TestTask1","TestTaskDescription1",Status.NEW,
+                Duration.ofHours(4), LocalTime.of(4, 48, 0));
         listOfTestTasks.add(task1.getId());
-        Task task2 = manager.addNewTask("TestTask2","TestTaskDescription2",Status.IN_PROGRESS);
+        Task task2 = manager.addNewTask("TestTask2","TestTaskDescription2",Status.IN_PROGRESS,
+                Duration.ofHours(5), LocalTime.of(5, 48, 0));
         listOfTestTasks.add(task2.getId());
 
         Set<Integer> setOfTestTasks = new HashSet<>(listOfTestTasks);
@@ -137,9 +155,12 @@ abstract class TaskManagerTest <T extends TaskManager>{
         List<Integer> listOfTestEpics = new ArrayList<>();
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
         listOfTestEpics.add(epic1.getId());
-        manager.addNewSubtask(epic1, "TestSubtask1", "TestSubtaskDescription1", Status.NEW);
-        manager.addNewSubtask(epic1, "TestSubtask2", "TestSubtaskDescription2", Status.DONE);
-        manager.addNewSubtask(epic1, "TestSubtask3", "TestSubtaskDescription3", Status.DONE);
+        manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW,
+                Duration.ofHours(1), LocalTime.of(1, 1, 0));
+        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE,
+                Duration.ofHours(2), LocalTime.of(2, 1, 0));
+        manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.DONE,
+                Duration.ofHours(3), LocalTime.of(3, 1, 0));
         Epic epic2 = manager.addNewEpic("TestEpic2", "TestEpicDescription2");
         listOfTestEpics.add(epic2.getId());
 
@@ -155,17 +176,17 @@ abstract class TaskManagerTest <T extends TaskManager>{
         List<Integer> listOfTestSubtasks = new ArrayList<>();
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
         Subtask subtask1 = manager.addNewSubtask(epic1, "TestSubtask1", "TestSubtaskDescription1",
-                Status.NEW);
+                Status.NEW, Duration.ofHours(1), LocalTime.of(1, 1, 0));
         listOfTestSubtasks.add(subtask1.getId());
         Subtask subtask2 = manager.addNewSubtask(epic1, "TestSubtask2", "TestSubtaskDescription2",
-                Status.DONE);
+                Status.DONE, Duration.ofHours(2), LocalTime.of(2, 1, 0));
         listOfTestSubtasks.add(subtask2.getId());
         Subtask subtask3 = manager.addNewSubtask(epic1, "TestSubtask3", "TestSubtaskDescription3",
-                Status.DONE);
+                Status.DONE, Duration.ofHours(3), LocalTime.of(3, 1, 0));
         listOfTestSubtasks.add(subtask3.getId());
         Epic epic2 = manager.addNewEpic("TestEpic2", "TestEpicDescription2");
         Subtask subtask4 = manager.addNewSubtask(epic2, "TestSubtask4", "TestSubtaskDescription4",
-                Status.IN_PROGRESS);
+                Status.IN_PROGRESS, Duration.ofHours(4), LocalTime.of(4, 1, 0));
         listOfTestSubtasks.add(subtask4.getId());
 
         Set<Integer> setOfTestSubtasks = new HashSet<>(listOfTestSubtasks);
@@ -177,12 +198,17 @@ abstract class TaskManagerTest <T extends TaskManager>{
 @Test
     void mustReturnCorrectHistory(){
     Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
-    manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW);
-    manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE);
-    manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.IN_PROGRESS);
+    manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW,
+            Duration.ofHours(1), LocalTime.of(1, 1, 0));
+    manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE,
+            Duration.ofHours(2), LocalTime.of(2, 1, 0));
+    manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.IN_PROGRESS,
+            Duration.ofHours(3), LocalTime.of(3, 1, 0));
     manager.addNewEpic("TestEpic2", "TestEpicDescription2");
-    manager.addNewTask("TestTask1","TestTaskDescription1",Status.NEW);
-    manager.addNewTask("TestTask2","TestTaskDescription2",Status.IN_PROGRESS);
+    manager.addNewTask("TestTask1","TestTaskDescription1",Status.NEW,
+            Duration.ofHours(4), LocalTime.of(4, 1, 0));
+    manager.addNewTask("TestTask2","TestTaskDescription2",Status.IN_PROGRESS,
+            Duration.ofHours(5), LocalTime.of(5, 1, 0));
     List<Task> listOfViewedTasks = new ArrayList<>();
 
     manager.getTask(1);
@@ -199,7 +225,8 @@ abstract class TaskManagerTest <T extends TaskManager>{
 
     @Test
     void mustAddTask(){
-        Task task1 = manager.addNewTask("TestTask1","TestTaskDescription1",Status.NEW);
+        Task task1 = manager.addNewTask("TestTask1","TestTaskDescription1",Status.NEW,
+                Duration.ofHours(1), LocalTime.of(1, 1, 0));
         Assertions.assertEquals(task1, manager.getTask(1));
         Assertions.assertNotEquals(task1, manager.getTask(2));
     }
@@ -213,10 +240,12 @@ abstract class TaskManagerTest <T extends TaskManager>{
     @Test
     void mustAddSubtask(){
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
-        manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW);
-        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE);
+        manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW,
+                Duration.ofHours(1), LocalTime.of(1, 1, 0));
+        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE,
+                Duration.ofHours(2), LocalTime.of(2, 1, 0));
         Subtask subtask3 = manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3",
-                Status.IN_PROGRESS);
+                Status.IN_PROGRESS, Duration.ofHours(3), LocalTime.of(3, 1, 0));
         Assertions.assertEquals(subtask3, manager.getTask(4));
         Assertions.assertNotEquals(subtask3, manager.getTask(3));
         Assertions.assertNotEquals(subtask3, manager.getTask(2));
@@ -225,9 +254,10 @@ abstract class TaskManagerTest <T extends TaskManager>{
 
     @Test
     void mustChangeTask(){
-        Task task1 = manager.addNewTask("TestTask1","TestTaskDescription1",Status.NEW);
+        Task task1 = manager.addNewTask("TestTask1","TestTaskDescription1",Status.NEW,
+                Duration.ofHours(1), LocalTime.of(1, 1, 0));
         Task task1Changed = new Task("TestTask1Changed", "TestTaskDescription1Changed", 1,
-                Status.IN_PROGRESS);
+                Status.IN_PROGRESS, Duration.ofHours(2), LocalTime.of(2, 1, 0));
         manager.changeTask(task1Changed);
         Assertions.assertEquals(task1Changed,manager.getTask(1));
         Assertions.assertNotEquals(task1, manager.getTask(1));
@@ -236,11 +266,14 @@ abstract class TaskManagerTest <T extends TaskManager>{
     @Test
     void mustChangeEpic(){
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
-        manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW);
-        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE);
-        manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.IN_PROGRESS);
+        manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW,
+                Duration.ofHours(1), LocalTime.of(1, 1, 0));
+        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE,
+                Duration.ofHours(2), LocalTime.of(2, 1, 0));
+        manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.IN_PROGRESS,
+                Duration.ofHours(3), LocalTime.of(3, 1, 0));
         Epic epic1Changed = new Epic("Epic1Changed", "TestEpicDescription1Changed", 1,
-                Status.NEW);
+                Status.NEW, Duration.ofHours(4), LocalTime.of(4, 1, 0));
         manager.changeEpic(epic1Changed);
         Assertions.assertEquals(epic1Changed,manager.getTask(1));
         Assertions.assertNotEquals(epic1, manager.getTask(1));
@@ -250,11 +283,13 @@ abstract class TaskManagerTest <T extends TaskManager>{
     void mustChangeSubtask(){
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
         Subtask subtask1 = manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1",
-                Status.NEW);
-        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE);
-        manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.IN_PROGRESS);
+                Status.NEW, Duration.ofHours(1), LocalTime.of(1, 1, 0));
+        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE,
+                Duration.ofHours(2), LocalTime.of(2, 1, 0));
+        manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.IN_PROGRESS,
+                Duration.ofHours(3), LocalTime.of(3, 1, 0));
         Subtask subtask1Changed = new Subtask(epic1,"Subtask1Changed", "TestSubtaskDescription1Changed",
-                2, Status.DONE);
+                2, Status.DONE, Duration.ofHours(4), LocalTime.of(4, 1, 0));
         manager.changeSubtask(subtask1Changed);
         Assertions.assertEquals(subtask1Changed,manager.getTask(2));
         Assertions.assertNotEquals(subtask1, manager.getTask(2));
@@ -263,12 +298,17 @@ abstract class TaskManagerTest <T extends TaskManager>{
     @Test
     void mustDeleteTask(){
         Epic epic1 = manager.addNewEpic("TestEpic1", "TestEpicDescription1");
-        manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW);
-        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE);
-        manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.IN_PROGRESS);
+        manager.addNewSubtask(epic1,"TestSubtask1", "TestSubtaskDescription1", Status.NEW,
+                Duration.ofHours(1), LocalTime.of(1, 1, 0));
+        manager.addNewSubtask(epic1,"TestSubtask2", "TestSubtaskDescription2", Status.DONE,
+                Duration.ofHours(2), LocalTime.of(2, 1, 0));
+        manager.addNewSubtask(epic1,"TestSubtask3", "TestSubtaskDescription3", Status.IN_PROGRESS,
+                Duration.ofHours(3), LocalTime.of(3, 1, 0));
         manager.addNewEpic("TestEpic2", "TestEpicDescription2");
-        manager.addNewTask("TestTask1","TestTaskDescription1",Status.NEW);
-        manager.addNewTask("TestTask2","TestTaskDescription2",Status.IN_PROGRESS);
+        manager.addNewTask("TestTask1","TestTaskDescription1",Status.NEW,
+                Duration.ofHours(4), LocalTime.of(4, 1, 0));
+        manager.addNewTask("TestTask2","TestTaskDescription2",Status.IN_PROGRESS,
+                Duration.ofHours(5), LocalTime.of(5, 1, 0));
         manager.deleteTaskByID(1);
         manager.deleteTaskByID(5);
         manager.deleteTaskByID(6);

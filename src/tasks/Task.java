@@ -1,23 +1,26 @@
 package tasks;
 
 import java.time.Duration;
-import java.time.Instant;
+import java.time.LocalTime;
 import java.util.Objects;
 
 public class Task {
+
     protected String title;
     protected String description;
     protected int id;
     protected Status status = Status.NEW;
     protected Type type = Type.TASK;
     protected Duration duration;
-    protected Instant startTime;
+    protected LocalTime startTime;
 
-    public Task(String title, String description, int id, Status status) {
+    public Task(String title, String description, int id, Status status, Duration duration, LocalTime startTime) {
         this.title = title;
         this.description = description;
         this.id = id;
         this.status = status;
+        this.duration = duration;
+        this.startTime = startTime;
     }
 
     public Task(String title, String description, int id) {
@@ -38,12 +41,34 @@ public class Task {
         this.status = status;
     }
 
+    public void setDuration(Duration duration){
+        this.duration = duration;
+    }
+    public void setStartTime(LocalTime startTime){
+        this.startTime = startTime;
+    }
+    public LocalTime getStartTime(){
+        return startTime;
+    }
+    public  Duration getDuration(){
+        return duration;
+    }
+
+    public LocalTime getEndTime(){
+        return startTime.plus(duration);
+    }
 
     @Override
     public String toString() {
-        return id + "," + type + "," + title + "," + status + "," + description + ",\n";
+        return id + ","
+                + type + ","
+                + title + ","
+                + status + ","
+                + description + ","
+                + duration + ","
+                + getStartTime() + ","
+                + getEndTime() + ",\n";
     }
-
 
     @Override
     public int hashCode() {

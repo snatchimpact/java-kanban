@@ -12,7 +12,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     public HashMap<Integer, Node<Task>> tasksViewingHistory = new HashMap<>();
     public CustomLinkedList customLinkedList = new CustomLinkedList();
 
-    static class CustomLinkedList {
+    private class CustomLinkedList {
         private Node<Task> head = null;
         private Node<Task> tail = null;
         public void linkLast(Task task){
