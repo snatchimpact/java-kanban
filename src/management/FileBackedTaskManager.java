@@ -22,13 +22,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public static void main(String[] args){
-        //Идём по пунктам ТЗ "Проверка работы нового менджера"
-        //"1.	Заведите несколько разных задач, эпиков и подзадач."
+        //Идём по пунктам ТЗ "Проверка работы менджера"
         File ourFile = new File("file.txt");
         FileBackedTaskManager fileBackedTasksManager = new FileBackedTaskManager(ourFile);
         fileBackedTasksManager.addNewTask("First Task", "Task No.1 lorem ipsum", Status.NEW,
                 Duration.ofMinutes(30), LocalTime.of(1, 0, 0));
-//        fileBackedTasksManager.addNewTask("Second Task", "Task No.2 lorem ipsum", Status.IN_PROGRESS);
+        fileBackedTasksManager.addNewTask("Second Task", "Task No.2 lorem ipsum", Status.IN_PROGRESS,
+                Duration.ofMinutes(30), LocalTime.of(5, 0, 0));
         Epic epic1 = fileBackedTasksManager.addNewEpic("First Epic", "Epic No.1 Lorem ipsum");
         fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's First Subtask",
                 "1st Epic's 1st Subtask Lorem ipsum",
@@ -41,7 +41,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 Status.DONE, Duration.ofMinutes(30), LocalTime.of(2, 0, 0));
         fileBackedTasksManager.addNewEpic("Second Epic", "Epic No.2 Lorem ipsum");
 
-        //2.	Запросите некоторые из них, чтобы заполнилась история просмотра.
+        //	Запросите некоторые из них, чтобы заполнилась история просмотра.
         System.out.println(fileBackedTasksManager.getTask(1));
         System.out.println(fileBackedTasksManager.getHistory());
         System.out.println(fileBackedTasksManager.getTask(2));
@@ -55,23 +55,24 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         System.out.println(fileBackedTasksManager.getTask(3));
         System.out.println(fileBackedTasksManager.getHistory());
 
+//      Проверим работу приоретизированных задач и пересечения
         System.out.println("Печатаем приоритизированные задачи");
         System.out.println(fileBackedTasksManager.getPrioritizedTasks());
 
-        //3.	Создайте новый FileBackedTasksManager менеджер из этого же файла.
+        //	Создадим новый FileBackedTasksManager менеджер из этого же файла.
 
-//        FileBackedTaskManager restoredFileBackedTasksManager = loadFromFile(ourFile);
+        FileBackedTaskManager restoredFileBackedTasksManager = loadFromFile(ourFile);
 
-        //4.	Проверьте, что история просмотра восстановилась верно и все задачи, эпики, подзадачи, которые были
+        // Проверим, что что история просмотра восстановилась верно и все задачи, эпики, подзадачи, которые были
         // в старом, есть в новом менеджере.
-/*        System.out.println("Печатаем изначальный менеджер");
+        System.out.println("Печатаем изначальный менеджер");
         System.out.println(fileBackedTasksManager);
         System.out.println("Печатаем восстановленный менеджер");
         System.out.println(restoredFileBackedTasksManager);
         System.out.println("Печатаем изначальный хистори менеджер");
         System.out.println(fileBackedTasksManager.inMemoryHistoryManager);
         System.out.println("Печатаем восстановленный хистори менеджер");
-        System.out.println(restoredFileBackedTasksManager.inMemoryHistoryManager);*/
+        System.out.println(restoredFileBackedTasksManager.inMemoryHistoryManager);
     }
 
 
