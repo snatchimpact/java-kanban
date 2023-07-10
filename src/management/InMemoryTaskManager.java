@@ -1,5 +1,6 @@
 package management;
 
+import exceptions.ManagerSaveException;
 import tasks.Epic;
 import tasks.Status;
 import tasks.Subtask;
@@ -7,9 +8,7 @@ import tasks.Task;
 
 import java.time.Duration;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 
 public class InMemoryTaskManager implements TaskManager {
@@ -22,7 +21,40 @@ public class InMemoryTaskManager implements TaskManager {
     public HashMap<Integer, Epic> epicsContainer = new HashMap<>();
     public HashMap<Integer, Subtask> subtasksContainer = new HashMap<>();
 
+    protected Set<Task> prioritizedTasks = new TreeSet<>((o1, o2) -> {
+        if (o1.getStartTime() == null && o2.getStartTime() == null) return o1.getId() - o2.getId();
+        if (o1.getStartTime() == null) return 1;
+        if (o2.getStartTime() == null) return -1;
+        if (o1.getStartTime().isAfter(o2.getStartTime())) return 1;
+        if (o1.getStartTime().isBefore(o2.getStartTime())) return -1;
+        if (o1.getStartTime().equals(o2.getStartTime())) return o1.getId() - o2.getId();
+        return 0;
+    });
 
+    @Override
+    public void checkTasksForIntersections(){
+        boolean firstControlTimeIsSet = false;
+        LocalTime controlTime = null;
+        for (Task task : prioritizedTasks){
+            if(!firstControlTimeIsSet){
+                controlTime = task.getEndTime();
+                firstControlTimeIsSet = true;
+            } else if (task.getStartTime() != null) {
+                if (task.getStartTime().isBefore(controlTime)) {
+                    throw new ManagerSaveException("Задачи пересекаются по времени, исправьте временные метки задач! " +
+                            "Задачи не должны пересекаться по времени!");
+                }
+                if (task.getStartTime().isAfter(controlTime) || task.getStartTime().equals(controlTime)) {
+                    controlTime = task.getEndTime();
+                }
+            }
+        }
+    }
+    @Override
+    public Set<Task> getPrioritizedTasks(){
+        checkTasksForIntersections();
+        return prioritizedTasks;
+    }
     @Override
     public int getNextID(){
         idCounter = idCounter + 1;
@@ -180,6 +212,7 @@ public class InMemoryTaskManager implements TaskManager {
     public Task addNewTask(String tasksTitle, String description, Status status, Duration duration, LocalTime localTime){
         Task task = new tasks.Task(tasksTitle, description, getNextID(), status, duration, localTime);
         tasksContainer.put(task.getId(), task);
+        prioritizedTasks.add(task);
         return task;
     }
 
@@ -200,6 +233,7 @@ public class InMemoryTaskManager implements TaskManager {
         epic.setDuration(deduceEpicsDuration(epic));
         epic.setStartTime(deduceEpicsStartTime(epic));
         epic.setEndTime(deduceEpicsEndTime(epic));
+        prioritizedTasks.add(subtask);
         return subtask;
     }
 
@@ -249,6 +283,8 @@ public class InMemoryTaskManager implements TaskManager {
         }
         return latestSubtaskEndTime;
     }
+
+
     @Override
     public boolean checkIfAllSubtasksHaveSameStatus (Epic epic) {
         ArrayList<Integer> subtasksIDsList = epic.getSubtasksIDsList();

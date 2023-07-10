@@ -7,16 +7,12 @@ import tasks.Task;
 
 import java.time.Duration;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 public interface TaskManager {
-    int idCounter = 0;
-    List<Task> viewingHistory = new ArrayList<>();
-    HashMap<Integer, Task> tasksContainer = new HashMap<>();
-    HashMap<Integer, Epic> epicsContainer = new HashMap<>();
-    HashMap<Integer, Subtask> subtasksContainer = new HashMap<>();
+    public void checkTasksForIntersections();
+    public Set<Task> getPrioritizedTasks();
 
     int getNextID();
 
