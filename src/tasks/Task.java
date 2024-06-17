@@ -32,6 +32,7 @@ public class Task {
     public int getId() {
         return id;
     }
+    public Type getType() {return type;}
 
     public Status getStatus() {
         return status;

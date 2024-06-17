@@ -30,7 +30,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         public ArrayList<Task> getTasks(){
             if (head == null){
-                System.out.println("История задач - пуста");
+//                System.out.println("История задач - пуста");
                 return null;
             } else{
                 ArrayList<Task> viewedTasksArrayList = new ArrayList<>();
