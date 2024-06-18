@@ -5,9 +5,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import management.FileBackedTaskManager;
-import tasks.Epic;
-import tasks.Status;
-import tasks.Type;
+import tasks.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLOutput;
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.HashMap;
 
 public class HttpTaskServer {
     private static final int PORT = 8080;
@@ -50,6 +49,7 @@ public class HttpTaskServer {
 
 
 
+
 // Создадим http сервер
 
         HttpServer httpServer = HttpServer.create();
@@ -67,7 +67,13 @@ public class HttpTaskServer {
             Endpoint endpoint = getEndpoint(String.valueOf(exchange.getRequestURI()), exchange.getRequestMethod());
 
             switch (endpoint) {
+                case UNKNOWN:{
+                    System.out.println("В handle пришел кейс UNKNOWN");
+                    break;
+                }
+
                 case GET_ALL_TASKS: {
+                    System.out.println("Case handleGetAllTasks");
                     handleGetAllTasks(exchange);
                     break;
                 }
@@ -84,6 +90,11 @@ public class HttpTaskServer {
                     handleGetTaskByID(exchange);
                     break;
                 }
+                case GET_HISTORY: {
+                    handleGetHistory(exchange);
+                    break;
+                }
+
                 default:
                     writeResponse(exchange, "Такого эндпоинта не существует", 404);
             }
@@ -93,15 +104,21 @@ public class HttpTaskServer {
     }
     private static Endpoint getEndpoint(String requestURI, String requestMethod) {
         String[] URIParts = requestURI.split("/");
-        if (URIParts.length == 3 && URIParts[2].equals("tasks") && requestMethod.equals("GET")) {
+        System.out.println(URIParts.length);
+        System.out.println(requestMethod);
+
+        if ((URIParts.length == 3 && URIParts[2].equals("tasks") && requestMethod.equals("GET")) || (URIParts.length == 2 && URIParts[1].equals("tasks") && requestMethod.equals("GET"))) {
+            System.out.println("getEndpoint says GET_ALL_TASKS");
             return Endpoint.GET_ALL_TASKS;
         }
+
         if (URIParts.length == 3 && URIParts[2].equals("epics") && requestMethod.equals("GET")) {
             return Endpoint.GET_ALL_EPICS;
         }
         if (URIParts.length == 3 && URIParts[2].equals("subtasks") && requestMethod.equals("GET")) {
             return Endpoint.GET_ALL_SUBTASKS;
         }
+
         if (URIParts.length == 4 && requestMethod.equals("GET")) {
             String[] lastSegment = URIParts[3].split("\\?");
             if(lastSegment.length == 2 && !(lastSegment[1] == null) ){
@@ -117,16 +134,22 @@ public class HttpTaskServer {
                     if(URIParts[2].equals("task") || URIParts[2].equals("subtask") || URIParts[2].equals("epic")){
                         return Endpoint.GET_TASK_BY_ID;
                     }  else {
-                        System.out.println("Запрос задачи по её номеру сформирован неверно, вместо task или subtask или epic указано" + URIParts[2]);
+                        System.out.println("Запрос задачи по её номеру сформирован неверно, вместо task или subtask или epic указано: " + URIParts[2]);
                     }
                 }
             }
+        }
+        
+
+        if (URIParts.length == 3 && URIParts[2].equals("history") && requestMethod.equals("GET")) {
+            return Endpoint.GET_HISTORY;
         }
 
         return Endpoint.UNKNOWN;
     }
 
     private static void handleGetAllTasks(HttpExchange exchange) throws IOException {
+        System.out.println("Executing handleGetAllTasks");
         writeResponse(exchange, gson.toJson(fileBackedTasksManager.getAllTasks()), 200);
     }
 
@@ -164,6 +187,11 @@ public class HttpTaskServer {
         return exchange.getRequestURI().toString().split("/")[2];
     }
 
+    private static void handleGetHistory(HttpExchange exchange) throws IOException {
+        writeResponse(exchange, gson.toJson(fileBackedTasksManager.getAllSubtasks()), 200);
+    }
+
+
     private static void writeResponse(HttpExchange exchange,
                                       String responseString,
                                       int responseCode) throws IOException {
@@ -187,13 +215,14 @@ public class HttpTaskServer {
         GET_TASK_BY_ID,
 //        GET_SUBTASK_BY_ID,
 //        GET_EPIC_BY_ID,
+GET_HISTORY,
+
         POST_TASK_BY_BODY,
         DELETE_TASK_BY_ID,
         DELETE_ALL_TASKS,
         GET_SUBTASK_METHODS,
         GET_EPIC_METHODS,
         GET_EPICS_SUBTASKS_BY_EPICS_ID,
-        GET_HISTORY,
         GET_PRIORITIZED_TASKS
     }
 }
