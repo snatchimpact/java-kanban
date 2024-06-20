@@ -94,6 +94,19 @@ public class HttpTaskServer {
                     handleGetHistory(exchange);
                     break;
                 }
+                case POST_TASK_BY_BODY:{
+                    handlePostTaskByBody(exchange);
+                    break;
+                }
+                case POST_EPIC_BY_BODY:{
+                    handlePostEpicByBody(exchange);
+                    break;
+                }
+                case POST_SUBTASK_BY_BODY:{
+                    handlePostSubtaskByBody(exchange);
+                    break;
+                }
+
 
                 default:
                     writeResponse(exchange, "Такого эндпоинта не существует", 404);
@@ -145,6 +158,18 @@ public class HttpTaskServer {
             return Endpoint.GET_HISTORY;
         }
 
+        if (URIParts.length == 4 && requestMethod.equals("POST")){
+                    if(URIParts[2].equals("task")){
+                        return Endpoint.POST_TASK_BY_BODY;
+                    } else if (URIParts[2].equals("subtask")){
+                        return Endpoint.POST_SUBTASK_BY_BODY;
+                    } else if (URIParts[2].equals("epic")){
+                        return Endpoint.POST_EPIC_BY_BODY;
+                    } else {
+                        return Endpoint.UNKNOWN;
+                    }
+            }
+
         return Endpoint.UNKNOWN;
     }
 
@@ -191,7 +216,24 @@ public class HttpTaskServer {
         writeResponse(exchange, gson.toJson(fileBackedTasksManager.getAllSubtasks()), 200);
     }
 
+    private static void handlePostTaskByBody(HttpExchange exchange) throws IOException {
+        String body = httpBodyToString(exchange);
+        if (body.isEmpty()) {
+            writeResponse(exchange, "Ничего не передано.", 400);
+        } else{
+            
+        }
+    }
 
+    private static void handlePostEpicByBody(HttpExchange exchange) throws IOException {
+
+    }
+    private static void handlePostSubtaskByBody(HttpExchange exchange) throws IOException {
+
+    }
+    private static String httpBodyToString(HttpExchange exchange) throws IOException {
+        return new String(exchange.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
+    }
     private static void writeResponse(HttpExchange exchange,
                                       String responseString,
                                       int responseCode) throws IOException {
@@ -213,11 +255,11 @@ public class HttpTaskServer {
         GET_ALL_EPICS,
         GET_ALL_SUBTASKS,
         GET_TASK_BY_ID,
-//        GET_SUBTASK_BY_ID,
-//        GET_EPIC_BY_ID,
-GET_HISTORY,
+        GET_HISTORY,
 
         POST_TASK_BY_BODY,
+        POST_EPIC_BY_BODY,
+        POST_SUBTASK_BY_BODY,
         DELETE_TASK_BY_ID,
         DELETE_ALL_TASKS,
         GET_SUBTASK_METHODS,
