@@ -1,6 +1,8 @@
 package http;
 
 import com.google.gson.*;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -16,7 +18,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLOutput;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
 public class HttpTaskServer {
@@ -73,7 +77,6 @@ public class HttpTaskServer {
                 }
 
                 case GET_ALL_TASKS: {
-                    System.out.println("Case handleGetAllTasks");
                     handleGetAllTasks(exchange);
                     break;
                 }
@@ -158,7 +161,7 @@ public class HttpTaskServer {
             return Endpoint.GET_HISTORY;
         }
 
-        if (URIParts.length == 4 && requestMethod.equals("POST")){
+        if (URIParts.length == 3 && requestMethod.equals("POST")){
                     if(URIParts[2].equals("task")){
                         return Endpoint.POST_TASK_BY_BODY;
                     } else if (URIParts[2].equals("subtask")){
@@ -220,10 +223,16 @@ public class HttpTaskServer {
         String body = httpBodyToString(exchange);
         if (body.isEmpty()) {
             writeResponse(exchange, "Ничего не передано.", 400);
-        } else{
-            fileBackedTasksManager.addNewTask("First Task", "Task No.1 lorem ipsum", Status.NEW,
-                    Duration.ofMinutes(30), LocalTime.of(1, 0, 0));
+        } else {
+            try {
+                fileBackedTasksManager.addTask(gson.fromJson(body, Task.class));
+                writeResponse(exchange, "Задача добавлена",
+                        201);
+            } catch (JsonSyntaxException e){
+                writeResponse(exchange, "Получен некорректный JSON", 400);
+            }
         }
+        System.out.println(fileBackedTasksManager);
     }
 
     private static void handlePostEpicByBody(HttpExchange exchange) throws IOException {
@@ -232,6 +241,7 @@ public class HttpTaskServer {
     private static void handlePostSubtaskByBody(HttpExchange exchange) throws IOException {
 
     }
+
     private static String httpBodyToString(HttpExchange exchange) throws IOException {
         return new String(exchange.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
     }
@@ -268,4 +278,23 @@ public class HttpTaskServer {
         GET_EPICS_SUBTASKS_BY_EPICS_ID,
         GET_PRIORITIZED_TASKS
     }
+
+    private static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
+        private final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy(HH:mm)");
+
+        @Override
+        public void write(final JsonWriter jsonWriter, final LocalDateTime localDateTime) throws IOException {
+            if (localDateTime == null) {
+                jsonWriter.nullValue();
+                return;
+            }
+            jsonWriter.value(localDateTime.format(DATE_TIME_FORMATTER));
+        }
+
+        @Override
+        public LocalDateTime read(final JsonReader jsonReader) throws IOException {
+            return LocalDateTime.parse(jsonReader.nextString(), DATE_TIME_FORMATTER);
+        }
+    }
+
 }
