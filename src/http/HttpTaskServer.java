@@ -221,7 +221,8 @@ public class HttpTaskServer {
         if (body.isEmpty()) {
             writeResponse(exchange, "Ничего не передано.", 400);
         } else{
-            
+            fileBackedTasksManager.addNewTask("First Task", "Task No.1 lorem ipsum", Status.NEW,
+                    Duration.ofMinutes(30), LocalTime.of(1, 0, 0));
         }
     }
 
