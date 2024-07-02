@@ -26,7 +26,9 @@ import java.util.HashMap;
 public class HttpTaskServer {
     private static final int PORT = 8080;
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-    private static final Gson gson = new GsonBuilder().setPrettyPrinting()
+    private static final Gson gson = new GsonBuilder()
+            .setPrettyPrinting()
+            .registerTypeAdapter(LocalTime.class, new LocalTimeAdapter())
             .serializeNulls()
             .create();;
     private static File ourFile = new File("file.txt");
@@ -140,7 +142,6 @@ public class HttpTaskServer {
             if(lastSegment.length == 2 && !(lastSegment[1] == null) ){
                 boolean isIDcorrect;
                 try {
-                    int ID = Integer.parseInt(lastSegment[1].split("=")[1]);
                     isIDcorrect = true;
                 } catch (NumberFormatException e) {
                     isIDcorrect = false;
@@ -226,20 +227,53 @@ public class HttpTaskServer {
         } else {
             try {
                 fileBackedTasksManager.addTask(gson.fromJson(body, Task.class));
-                writeResponse(exchange, "Задача добавлена",
+                writeResponse(exchange, "Task добавлен",
                         201);
             } catch (JsonSyntaxException e){
-                writeResponse(exchange, "Получен некорректный JSON", 400);
+                System.out.println("Печатаем эксепшен");
+                System.out.println(e);
+                System.out.println("Распечатали эксепшен");
+                writeResponse(exchange, "Получен некорректный JSON с Task", 400);
             }
         }
         System.out.println(fileBackedTasksManager);
     }
 
     private static void handlePostEpicByBody(HttpExchange exchange) throws IOException {
-
+        String body = httpBodyToString(exchange);
+        if (body.isEmpty()) {
+            writeResponse(exchange, "Ничего не передано.", 400);
+        } else {
+            try {
+                fileBackedTasksManager.addEpic(gson.fromJson(body, Epic.class));
+                writeResponse(exchange, "Epic добавлен",
+                        201);
+            } catch (JsonSyntaxException e){
+                System.out.println("Печатаем эксепшен");
+                System.out.println(e);
+                System.out.println("Распечатали эксепшен");
+                writeResponse(exchange, "Получен некорректный JSON с Epic", 400);
+            }
+        }
+        System.out.println(fileBackedTasksManager);
     }
     private static void handlePostSubtaskByBody(HttpExchange exchange) throws IOException {
-
+        String body = httpBodyToString(exchange);
+        if (body.isEmpty()) {
+            writeResponse(exchange, "Ничего не передано.", 400);
+        } else {
+            try {
+                fileBackedTasksManager.addSubtask(gson.fromJson(body, Subtask.class));
+                writeResponse(exchange, "Subtask добавлен",
+                        201);
+            } catch (JsonSyntaxException e){
+                System.out.println("Печатаем эксепшен");
+                System.out.println(e);
+                System.out.println("Распечатали эксепшен");
+                writeResponse(exchange, "Получен некорректный JSON с Subtask", 400);
+            }
+        }
+        System.out.println(fileBackedTasksManager);
     }
 
     private static String httpBodyToString(HttpExchange exchange) throws IOException {
@@ -279,21 +313,21 @@ public class HttpTaskServer {
         GET_PRIORITIZED_TASKS
     }
 
-    private static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
-        private final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy(HH:mm)");
+    private static class LocalTimeAdapter extends TypeAdapter<LocalTime> {
+        private final DateTimeFormatter formatterWriter = DateTimeFormatter.ofPattern("HH:mm");
 
         @Override
-        public void write(final JsonWriter jsonWriter, final LocalDateTime localDateTime) throws IOException {
-            if (localDateTime == null) {
+        public void write(final JsonWriter jsonWriter, final LocalTime localTime) throws IOException {
+            if (localTime == null) {
                 jsonWriter.nullValue();
                 return;
             }
-            jsonWriter.value(localDateTime.format(DATE_TIME_FORMATTER));
+            jsonWriter.value(localTime.format(formatterWriter));
         }
 
         @Override
-        public LocalDateTime read(final JsonReader jsonReader) throws IOException {
-            return LocalDateTime.parse(jsonReader.nextString(), DATE_TIME_FORMATTER);
+        public LocalTime read(final JsonReader jsonReader) throws IOException {
+            return LocalTime.parse(jsonReader.nextString(), formatterWriter);
         }
     }
 
