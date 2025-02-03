@@ -32,6 +32,13 @@ public class InMemoryTaskManager implements TaskManager {
     });
 
     @Override
+    public HashMap<Integer, Task> getTasks() { return new HashMap<>(tasksContainer); }
+    @Override
+    public HashMap<Integer, Epic> getEpics() { return new HashMap<>(epicsContainer); }
+
+    @Override
+    public HashMap<Integer, Subtask> getSubtasks() { return new HashMap<>(subtasksContainer); }
+    @Override
     public void checkTasksForIntersections(){
         boolean firstControlTimeIsSet = false;
         LocalTime controlTime = null;
@@ -155,21 +162,21 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void changeTask(Task task) {
+    public void updateTask(Task task) {
         if (tasksContainer.get(task.getId()) != null) {
             tasksContainer.put(task.getId(), task);
         }
     }
 
     @Override
-    public void changeEpic(Epic epic){
+    public void updateEpic(Epic epic){
         if (epicsContainer.get(epic.getId()) != null){
             epicsContainer.put(epic.getId(), epic);
         }
     }
 
     @Override
-    public void changeSubtask(Subtask subtask){
+    public void updateSubtask(Subtask subtask){
         if (subtasksContainer.get(subtask.getId()) != null){
             Epic epic = epicsContainer.get(subtask.getEpicID());
             epic.addSubtaskToSubtasksList(subtask);

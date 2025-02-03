@@ -1,6 +1,5 @@
 package management;
 
-import com.google.gson.Gson;
 import exceptions.ManagerSaveException;
 import tasks.*;
 
@@ -320,20 +319,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void changeTask(Task task) {
-        super.changeTask(task);
+    public void updateTask(Task task) {
+        super.updateTask(task);
         save();
     }
 
     @Override
-    public void changeEpic(Epic epic) {
-        super.changeEpic(epic);
+    public void updateEpic(Epic epic) {
+        super.updateEpic(epic);
         save();
     }
 
     @Override
-    public void changeSubtask(Subtask subtask) {
-        super.changeSubtask(subtask);
+    public void updateSubtask(Subtask subtask) {
+        super.updateSubtask(subtask);
         save();
     }
 

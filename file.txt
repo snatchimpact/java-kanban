@@ -1,7 +1,6 @@
 id,type,name,status,description,startTime,duration,endTime,epic
 1,TASK,First Task,NEW,Task No.1 lorem ipsum,PT30M,01:00,01:30,
 2,TASK,Second Task,IN_PROGRESS,Task No.2 lorem ipsum,PT30M,05:00,05:30,
-8,TASK,Added Task,NEW,Added Task lorem ipsum,PT30M,04:00,04:30,
 3,EPIC,First Epic,IN_PROGRESS,Epic No.1 Lorem ipsum,PT1H30M,02:00,04:30
 7,EPIC,Second Epic,NEW,Epic No.2 Lorem ipsum,null,null,null
 4,SUBTASK,1st Epic's First Subtask,NEW,1st Epic's 1st Subtask Lorem ipsum,PT30M,04:00,04:30,3

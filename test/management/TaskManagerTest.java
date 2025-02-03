@@ -258,7 +258,7 @@ abstract class TaskManagerTest <T extends TaskManager>{
                 Duration.ofHours(1), LocalTime.of(1, 1, 0));
         Task task1Changed = new Task("TestTask1Changed", "TestTaskDescription1Changed", 1,
                 Status.IN_PROGRESS, Duration.ofHours(2), LocalTime.of(2, 1, 0));
-        manager.changeTask(task1Changed);
+        manager.updateTask(task1Changed);
         Assertions.assertEquals(task1Changed,manager.getTask(1));
         Assertions.assertNotEquals(task1, manager.getTask(1));
     }
@@ -274,7 +274,7 @@ abstract class TaskManagerTest <T extends TaskManager>{
                 Duration.ofHours(3), LocalTime.of(3, 1, 0));
         Epic epic1Changed = new Epic("Epic1Changed", "TestEpicDescription1Changed", 1,
                 Status.NEW, Duration.ofHours(4), LocalTime.of(4, 1, 0));
-        manager.changeEpic(epic1Changed);
+        manager.updateEpic(epic1Changed);
         Assertions.assertEquals(epic1Changed,manager.getTask(1));
         Assertions.assertNotEquals(epic1, manager.getTask(1));
     }
@@ -290,7 +290,7 @@ abstract class TaskManagerTest <T extends TaskManager>{
                 Duration.ofHours(3), LocalTime.of(3, 1, 0));
         Subtask subtask1Changed = new Subtask(epic1,"Subtask1Changed", "TestSubtaskDescription1Changed",
                 2, Status.DONE, Duration.ofHours(4), LocalTime.of(4, 1, 0));
-        manager.changeSubtask(subtask1Changed);
+        manager.updateSubtask(subtask1Changed);
         Assertions.assertEquals(subtask1Changed,manager.getTask(2));
         Assertions.assertNotEquals(subtask1, manager.getTask(2));
     }

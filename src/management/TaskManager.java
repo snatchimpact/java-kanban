@@ -7,10 +7,15 @@ import tasks.Task;
 
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 public interface TaskManager {
+    HashMap<Integer, Task> getTasks();
+    HashMap<Integer, Subtask> getSubtasks();
+
+    HashMap<Integer, Epic> getEpics();
     public void checkTasksForIntersections();
     public Set<Task> getPrioritizedTasks();
 
@@ -38,11 +43,11 @@ public interface TaskManager {
 
     void addSubtask(Subtask subtask);
 
-    void changeTask(Task task);
+    void updateTask(Task task);
 
-    void changeEpic(Epic epic);
+    void updateEpic(Epic epic);
 
-    void changeSubtask(Subtask subtask);
+    void updateSubtask(Subtask subtask);
 
     void deleteTaskByID (int taskNumber);
 

@@ -7,12 +7,14 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import management.FileBackedTaskManager;
+import management.TaskManager;
 import tasks.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -24,58 +26,79 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
 public class HttpTaskServer {
-    private static final int PORT = 8080;
-    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-    private static final Gson gson = new GsonBuilder()
-            .setPrettyPrinting()
-            .registerTypeAdapter(LocalTime.class, new LocalTimeAdapter())
-            .serializeNulls()
-            .create();;
-    private static File ourFile = new File("file.txt");
-    private static FileBackedTaskManager fileBackedTasksManager = new FileBackedTaskManager(ourFile);
 
-    public static void main(String[] args) throws IOException {
-        //Сначала наполним ТасксМенеджер задачами
+    private TaskManager taskManager;
+    private HttpServer httpServer;
 
-        fileBackedTasksManager.addNewTask("First Task", "Task No.1 lorem ipsum", Status.NEW,
-                Duration.ofMinutes(30), LocalTime.of(1, 0, 0));
-        fileBackedTasksManager.addNewTask("Second Task", "Task No.2 lorem ipsum", Status.IN_PROGRESS,
-                Duration.ofMinutes(30), LocalTime.of(5, 0, 0));
-        Epic epic1 = fileBackedTasksManager.addNewEpic("First Epic", "Epic No.1 Lorem ipsum");
-        fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's First Subtask",
-                "1st Epic's 1st Subtask Lorem ipsum",
-                Status.NEW, Duration.ofMinutes(30), LocalTime.of(4, 0, 0));
-        fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's Second Subtask",
-                "1st Epic's 2nd Subtask Lorem ipsum",
-                Status.IN_PROGRESS, Duration.ofMinutes(30), LocalTime.of(3, 0, 0));
-        fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's Third Subtask",
-                "1st Epic's 3rd Subtask Lorem ipsum",
-                Status.DONE, Duration.ofMinutes(30), LocalTime.of(2, 0, 0));
-        fileBackedTasksManager.addNewEpic("Second Epic", "Epic No.2 Lorem ipsum");
+    public HttpTaskServer(TaskManager taskManager) throws IOException {
 
-
-
-
-// Создадим http сервер
-
-        HttpServer httpServer = HttpServer.create();
-        httpServer.bind(new InetSocketAddress(PORT), 0);
-        httpServer.createContext("/tasks", new TasksHandler());
-        httpServer.start();
-        System.out.println("HTTP-сервер запущен на " + PORT + " порту!");
-
-
+        this.taskManager = taskManager;
+        createHTTPServer();
     }
 
-    static class TasksHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            Endpoint endpoint = getEndpoint(String.valueOf(exchange.getRequestURI()), exchange.getRequestMethod());
+    private static final String TASK = "task";
+    private static final String EPIC = "epic";
+    private static final String SUBTASK = "subtask";
+    private static final String HISTORY = "history";
 
-            switch (endpoint) {
-                case UNKNOWN:{
-                    System.out.println("В handle пришел кейс UNKNOWN");
+    private final int PORT = 8080;
+    private final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+    private Gson gson = new GsonBuilder()
+            .setPrettyPrinting()
+            .serializeNulls()
+            .create();
+
+    public Gson getGson() {
+        return gson;
+    }
+
+    private void createHTTPServer() throws IOException {
+        httpServer = HttpServer.create();
+        httpServer.bind(new InetSocketAddress(PORT), 0);
+        httpServer.createContext("/tasks", new TaskHandler());
+    }
+
+    public void startHttpServer() {
+        httpServer.start();
+        System.out.println("HTTP-сервер запущен на " + PORT + " порту!");
+    }
+    public void stopHttpServer() {
+        httpServer.stop(1);
+    }
+
+    private class TaskHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange httpExchange) throws IOException {
+            String methodRequest = httpExchange.getRequestMethod();
+            URI requestURI = httpExchange.getRequestURI();
+            String path = requestURI.getPath();
+            String[] splitPath = path.split("/");
+
+            if (splitPath.length == 2 && methodRequest.equals("GET")) {
+                handleGetPrioritizedTasks(httpExchange);
+            }
+
+
+            switch (methodRequest) {
+                case "POST":{
+                    if (splitPath[2].equals(TASK)) {
+                        handlePostAddUpdateTask(httpExchange);
+                    } else if (splitPath[2].equals(EPIC)) {
+                        handlePostAddUpdateEpic(httpExchange);
+                    } else if (splitPath[2].equals(SUBTASK)) {
+                        handlePostAddUpdateSubtask(httpExchange);
+                    } else {
+                        outputStreamWrite(httpExchange, "Запрашиваемая страница не найдена", 404);
+                    }
                     break;
+                }
+
+                case "GET":{
+                    if (splitPath[2].equals(TASK)) {
+                        handleGetTaskGetTasksMap(httpExchange);
+                    }
+
+
                 }
 
                 case GET_ALL_TASKS: {
@@ -331,4 +354,123 @@ public class HttpTaskServer {
         }
     }
 
+
+
+    public void handleGetPrioritizedTasks(HttpExchange exchange) throws IOException {
+        if (!taskManager.getPrioritizedTasks().isEmpty()) {
+            outputStreamWrite(exchange, gson.toJson(taskManager.getPrioritizedTasks()), 200);
+        } else {
+            outputStreamWrite(exchange, "Отсортированный список задач не найден в базе.", 404);
+        }
+    }
+
+
+    public void handlePostAddUpdateTask(HttpExchange httpExchange) throws IOException {
+        String body = readText(httpExchange);
+        if (body.isEmpty()) {
+            outputStreamWrite(httpExchange, "Ничего не передано.", 400);
+            return;
+        }
+        Task task = gson.fromJson(body, Task.class);
+        Integer idTask = task.getId();
+        if (idTask == null) {
+            taskManager.addTask(task);
+            outputStreamWrite(httpExchange, "Создали новую задачу с Id " + task.getId(), 200);
+        } else {
+            if (taskManager.getTasks().containsKey(idTask)) {
+                taskManager.updateTask(task);
+                outputStreamWrite(httpExchange, "Обновили задачу с Id "+ idTask, 200);
+            } else {
+                outputStreamWrite(httpExchange, "Задачи с Id " + idTask + " нет в базе.", 404);
+            }
+        }
+    }
+
+    public void handlePostAddUpdateEpic(HttpExchange httpExchange) throws IOException {
+        String body = readText(httpExchange);
+        if (body.isEmpty()) {
+            outputStreamWrite(httpExchange, "Ничего не передано.", 400);
+            return;
+        }
+        Epic epic = gson.fromJson(body, Epic.class);
+        Integer idEpic = epic.getId();
+        if (idEpic == null) {
+            taskManager.addEpic(epic);
+            outputStreamWrite(httpExchange, "Создали новый эпик с Id "+ epic.getId(), 200);
+        } else {
+            if (taskManager.getEpics().containsKey(idEpic)) {
+                taskManager.updateEpic(epic);
+                outputStreamWrite(httpExchange, "Обновили эпик с Id "+ idEpic, 200);
+            } else {
+                outputStreamWrite(httpExchange, "Эпика с Id " + idEpic + " нет в базе.", 404);
+            }
+        }
+    }
+
+    public void handlePostAddUpdateSubtask(HttpExchange httpExchange) throws IOException {
+        String body = readText(httpExchange);
+        if (body.isEmpty()) {
+            outputStreamWrite(httpExchange, "Ничего не передано.", 400);
+            return;
+        }
+        Subtask subtask = gson.fromJson(body, Subtask.class);
+        Integer idSubTask = subtask.getId();
+        if (idSubTask == null) {
+            if (taskManager.getEpics().containsKey(subtask.getEpicID())) {
+                taskManager.addSubtask(subtask);
+                outputStreamWrite(httpExchange, "Создали новую подзадачу с Id " + subtask.getId(), 200);
+            } else {
+                outputStreamWrite(httpExchange, "Эпика с Id " + subtask.getEpicID() + " нет в базе.", 404);
+            }
+        } else {
+            if (taskManager.getSubtasks().containsKey(idSubTask)) {
+                taskManager.updateSubtask(subtask);
+                outputStreamWrite(httpExchange, "Обновили подзадачу с Id " + idSubTask, 200);
+            } else {
+                outputStreamWrite(httpExchange, "Подзадачи с Id " + idSubTask + " нет в базе.", 404);
+            }
+        }
+    }
+    void outputStreamWrite(HttpExchange exchange, String response, int code) throws IOException {
+        exchange.sendResponseHeaders(code, 0);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(response.getBytes());
+        }
+    }
+    private String readText(HttpExchange h) throws IOException {
+        return new String(h.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
+    }
+
+    //походу ненужное
+    private static File ourFile = new File("file.txt");
+    private static FileBackedTaskManager fileBackedTasksManager = new FileBackedTaskManager(ourFile);
+
+    public static void main(String[] args) throws IOException {
+        //Сначала наполним ТасксМенеджер задачами
+
+        fileBackedTasksManager.addNewTask("First Task", "Task No.1 lorem ipsum", Status.NEW,
+                Duration.ofMinutes(30), LocalTime.of(1, 0, 0));
+        fileBackedTasksManager.addNewTask("Second Task", "Task No.2 lorem ipsum", Status.IN_PROGRESS,
+                Duration.ofMinutes(30), LocalTime.of(5, 0, 0));
+        Epic epic1 = fileBackedTasksManager.addNewEpic("First Epic", "Epic No.1 Lorem ipsum");
+        fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's First Subtask",
+                "1st Epic's 1st Subtask Lorem ipsum",
+                Status.NEW, Duration.ofMinutes(30), LocalTime.of(4, 0, 0));
+        fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's Second Subtask",
+                "1st Epic's 2nd Subtask Lorem ipsum",
+                Status.IN_PROGRESS, Duration.ofMinutes(30), LocalTime.of(3, 0, 0));
+        fileBackedTasksManager.addNewSubtask(epic1, "1st Epic's Third Subtask",
+                "1st Epic's 3rd Subtask Lorem ipsum",
+                Status.DONE, Duration.ofMinutes(30), LocalTime.of(2, 0, 0));
+        fileBackedTasksManager.addNewEpic("Second Epic", "Epic No.2 Lorem ipsum");
+
+
+
+
+// Создадим http сервер
+
+
+
+
+    }
 }
