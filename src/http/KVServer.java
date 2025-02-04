@@ -28,8 +28,30 @@ public class KVServer {
         server.createContext("/load", this::load);
     }
 
-    private void load(HttpExchange httExchange) {
+    private void load(HttpExchange httExchange) throws IOException {
         // TODO Добавьте получение значения по ключу
+        try {
+            if (!hasAuth(httExchange)) {
+                System.out.println("Запрос неавторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
+                httExchange.sendResponseHeaders(403, 0);
+                return;
+            }
+            if ("GET".equals(httExchange.getRequestMethod())) {
+                String key = httExchange.getRequestURI().getPath().substring("/load/".length());
+                if (key.isEmpty()) {
+                    System.out.println("Key для выдачи пустой. key указывается в пути: /load/{key}");
+                    httExchange.sendResponseHeaders(400, 0);
+                    return;
+                }
+                sendText(httExchange, data.get(key));
+                httExchange.sendResponseHeaders(200, 0);
+            } else {
+                System.out.println("/load ждёт GET-запрос, а получил: " + httExchange.getRequestMethod());
+                httExchange.sendResponseHeaders(405, 0);
+            }
+        } finally {
+            httExchange.close();
+        }
     }
 
     private void save(HttpExchange httExchange) throws IOException {

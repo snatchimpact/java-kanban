@@ -35,6 +35,10 @@ public interface TaskManager {
 
     Task getTask(int taskNumber);
 
+    Epic getEpic(int epicNumber);
+
+    Subtask getSubtask(int subtaskNumber);
+
     List<Task> getHistory();
 
     void addTask(Task task);

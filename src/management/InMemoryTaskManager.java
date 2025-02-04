@@ -131,10 +131,32 @@ public class InMemoryTaskManager implements TaskManager {
             return subtasksContainer.get(taskID);
         } else {
             System.out.println("Задачи, эпика, или подзадачи с ID " + taskID + " в менеджере задач - нет.");
+            return null;
         }
+
+    }
+@Override
+public Epic getEpic(int epicID){
+        if (epicsContainer.containsKey(epicID)){
+        inMemoryHistoryManager.add(epicsContainer.get(epicID));
+        return epicsContainer.get(epicID);
+    }
+        else {
+            System.out.println("Эпика с ID " + epicID + " в менеджере задач - нет.");
+        return null;
+        }
+}
+
+@Override
+public Subtask getSubtask(int subtaskID){
+    if (subtasksContainer.containsKey(subtaskID)){
+        inMemoryHistoryManager.add(subtasksContainer.get(subtaskID));
+        return subtasksContainer.get(subtaskID);
+    } else {
+        System.out.println("Подзадачи с ID " + subtaskID + " в менеджере задач - нет.");
         return null;
     }
-
+}
     @Override
     public List<Task> getHistory(){
         return inMemoryHistoryManager.getHistory();
