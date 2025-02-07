@@ -16,8 +16,9 @@ public interface TaskManager {
     HashMap<Integer, Subtask> getSubtasks();
 
     HashMap<Integer, Epic> getEpics();
-    public void checkTasksForIntersections();
-    public Set<Task> getPrioritizedTasks();
+    void checkTasksForIntersections();
+    Set<Task> getPrioritizedTasks();
+    HistoryManager getHistoryManager();
 
     int getNextID();
 

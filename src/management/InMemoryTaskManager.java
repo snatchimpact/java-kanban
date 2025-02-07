@@ -13,13 +13,13 @@ import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
-
-
-    int idCounter = 0;
+    public int idCounter = 0;
     public HistoryManager inMemoryHistoryManager = new InMemoryHistoryManager();
     public HashMap<Integer, Task> tasksContainer = new HashMap<>();
     public HashMap<Integer, Epic> epicsContainer = new HashMap<>();
     public HashMap<Integer, Subtask> subtasksContainer = new HashMap<>();
+
+
 
     protected Set<Task> prioritizedTasks = new TreeSet<>((o1, o2) -> {
         if (o1.getStartTime() == null && o2.getStartTime() == null) return o1.getId() - o2.getId();
@@ -31,6 +31,13 @@ public class InMemoryTaskManager implements TaskManager {
         return 0;
     });
 
+    public InMemoryTaskManager(HistoryManager historyManager) {
+        this.inMemoryHistoryManager = historyManager;
+    }
+    public InMemoryTaskManager() {
+    }
+
+
     @Override
     public HashMap<Integer, Task> getTasks() { return new HashMap<>(tasksContainer); }
     @Override
@@ -38,6 +45,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public HashMap<Integer, Subtask> getSubtasks() { return new HashMap<>(subtasksContainer); }
+
+    @Override
+    public HistoryManager getHistoryManager() {
+        return inMemoryHistoryManager;
+    }
     @Override
     public void checkTasksForIntersections(){
         boolean firstControlTimeIsSet = false;

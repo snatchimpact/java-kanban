@@ -15,15 +15,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLOutput;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 
 public class HttpTaskServer {
 
@@ -93,10 +89,9 @@ public class HttpTaskServer {
                     break;
                 }
 
-                case "GET": {
+                case "GET":
                     if (splitPath[2].equals(TASK)) {
                         handleGetTaskGetTasksMap(httpExchange);
-
                     } else if (splitPath[2].equals(EPIC)) {
                         handleGetEpicGetEpicsMap(httpExchange);
                     } else if (splitPath[2].equals(SUBTASK)) {
@@ -223,21 +218,21 @@ public class HttpTaskServer {
             }
         }
     }
-    public void handleGetEpicGetEpicsMap(HttpExchange h) throws IOException {
-        if (h.getRequestURI().getQuery() != null) {
-            int idEpic = setId(h);
+    public void handleGetEpicGetEpicsMap(HttpExchange httpExchange) throws IOException {
+        if (httpExchange.getRequestURI().getQuery() != null) {
+            int idEpic = setId(httpExchange);
             if (taskManager.getEpics().containsKey(idEpic)) {
                 Epic epic = taskManager.getEpic(idEpic);
-                outputStreamWrite(h, gson.toJson(epic), 200);
+                outputStreamWrite(httpExchange, gson.toJson(epic), 200);
             } else {
-                outputStreamWrite(h, "Эпик с Id " + idEpic + " не найден в базе.", 404);
+                outputStreamWrite(httpExchange, "Эпик с Id " + idEpic + " не найден в базе.", 404);
             }
         } else {
             if (!taskManager.getEpics().isEmpty()) {
-                outputStreamWrite(h, gson.toJson(taskManager.getEpics()), 200);
+                outputStreamWrite(httpExchange, gson.toJson(taskManager.getEpics()), 200);
             } else {
                 String message = "Список эпиков не найден в базе.";
-                outputStreamWrite(h, message, 404);
+                outputStreamWrite(httpExchange, message, 404);
             }
         }
     }
@@ -264,94 +259,94 @@ public class HttpTaskServer {
                 .split("\\?")[1].split("=")[1]);
         return id;
     }
-    private static Endpoint getEndpoint(String requestURI, String requestMethod) {
-        String[] URIParts = requestURI.split("/");
-        System.out.println(URIParts.length);
-        System.out.println(requestMethod);
+//    private static Endpoint getEndpoint(String requestURI, String requestMethod) {
+//        String[] URIParts = requestURI.split("/");
+//        System.out.println(URIParts.length);
+//        System.out.println(requestMethod);
+//
+//        if ((URIParts.length == 3 && URIParts[2].equals("tasks") && requestMethod.equals("GET")) || (URIParts.length == 2 && URIParts[1].equals("tasks") && requestMethod.equals("GET"))) {
+//            System.out.println("getEndpoint says GET_ALL_TASKS");
+//            return Endpoint.GET_ALL_TASKS;
+//        }
+//
+//        if (URIParts.length == 3 && URIParts[2].equals("epics") && requestMethod.equals("GET")) {
+//            return Endpoint.GET_ALL_EPICS;
+//        }
+//        if (URIParts.length == 3 && URIParts[2].equals("subtasks") && requestMethod.equals("GET")) {
+//            return Endpoint.GET_ALL_SUBTASKS;
+//        }
+//
+//        if (URIParts.length == 4 && requestMethod.equals("GET")) {
+//            String[] lastSegment = URIParts[3].split("\\?");
+//            if(lastSegment.length == 2 && !(lastSegment[1] == null) ){
+//                boolean isIDcorrect;
+//                try {
+//                    isIDcorrect = true;
+//                } catch (NumberFormatException e) {
+//                    isIDcorrect = false;
+//                    System.out.println("В качестве номера задачи передан не Integer, а символ " + lastSegment[1].split("=")[1]);
+//                }
+//                if(isIDcorrect){
+//                    if(URIParts[2].equals("task") || URIParts[2].equals("subtask") || URIParts[2].equals("epic")){
+//                        return Endpoint.GET_TASK_BY_ID;
+//                    }  else {
+//                        System.out.println("Запрос задачи по её номеру сформирован неверно, вместо task или subtask или epic указано: " + URIParts[2]);
+//                    }
+//                }
+//            }
+//        }
+//
+//
+//        if (URIParts.length == 3 && URIParts[2].equals("history") && requestMethod.equals("GET")) {
+//            return Endpoint.GET_HISTORY;
+//        }
+//
+//        if (URIParts.length == 3 && requestMethod.equals("POST")){
+//                    if(URIParts[2].equals("task")){
+//                        return Endpoint.POST_TASK_BY_BODY;
+//                    } else if (URIParts[2].equals("subtask")){
+//                        return Endpoint.POST_SUBTASK_BY_BODY;
+//                    } else if (URIParts[2].equals("epic")){
+//                        return Endpoint.POST_EPIC_BY_BODY;
+//                    } else {
+//                        return Endpoint.UNKNOWN;
+//                    }
+//            }
+//
+//        return Endpoint.UNKNOWN;
+//    }
 
-        if ((URIParts.length == 3 && URIParts[2].equals("tasks") && requestMethod.equals("GET")) || (URIParts.length == 2 && URIParts[1].equals("tasks") && requestMethod.equals("GET"))) {
-            System.out.println("getEndpoint says GET_ALL_TASKS");
-            return Endpoint.GET_ALL_TASKS;
-        }
+//    private static void handleGetAllTasks(HttpExchange exchange) throws IOException {
+//        System.out.println("Executing handleGetAllTasks");
+//        writeResponse(exchange, gson.toJson(fileBackedTasksManager.getAllTasks()), 200);
+//    }
 
-        if (URIParts.length == 3 && URIParts[2].equals("epics") && requestMethod.equals("GET")) {
-            return Endpoint.GET_ALL_EPICS;
-        }
-        if (URIParts.length == 3 && URIParts[2].equals("subtasks") && requestMethod.equals("GET")) {
-            return Endpoint.GET_ALL_SUBTASKS;
-        }
+//    private static void handleGetAllEpics(HttpExchange exchange) throws IOException {
+//        writeResponse(exchange, gson.toJson(fileBackedTasksManager.getAllEpics()), 200);
+//    }
 
-        if (URIParts.length == 4 && requestMethod.equals("GET")) {
-            String[] lastSegment = URIParts[3].split("\\?");
-            if(lastSegment.length == 2 && !(lastSegment[1] == null) ){
-                boolean isIDcorrect;
-                try {
-                    isIDcorrect = true;
-                } catch (NumberFormatException e) {
-                    isIDcorrect = false;
-                    System.out.println("В качестве номера задачи передан не Integer, а символ " + lastSegment[1].split("=")[1]);
-                }
-                if(isIDcorrect){
-                    if(URIParts[2].equals("task") || URIParts[2].equals("subtask") || URIParts[2].equals("epic")){
-                        return Endpoint.GET_TASK_BY_ID;
-                    }  else {
-                        System.out.println("Запрос задачи по её номеру сформирован неверно, вместо task или subtask или epic указано: " + URIParts[2]);
-                    }
-                }
-            }
-        }
-        
-
-        if (URIParts.length == 3 && URIParts[2].equals("history") && requestMethod.equals("GET")) {
-            return Endpoint.GET_HISTORY;
-        }
-
-        if (URIParts.length == 3 && requestMethod.equals("POST")){
-                    if(URIParts[2].equals("task")){
-                        return Endpoint.POST_TASK_BY_BODY;
-                    } else if (URIParts[2].equals("subtask")){
-                        return Endpoint.POST_SUBTASK_BY_BODY;
-                    } else if (URIParts[2].equals("epic")){
-                        return Endpoint.POST_EPIC_BY_BODY;
-                    } else {
-                        return Endpoint.UNKNOWN;
-                    }
-            }
-
-        return Endpoint.UNKNOWN;
-    }
-
-    private static void handleGetAllTasks(HttpExchange exchange) throws IOException {
-        System.out.println("Executing handleGetAllTasks");
-        writeResponse(exchange, gson.toJson(fileBackedTasksManager.getAllTasks()), 200);
-    }
-
-    private static void handleGetAllEpics(HttpExchange exchange) throws IOException {
-        writeResponse(exchange, gson.toJson(fileBackedTasksManager.getAllEpics()), 200);
-    }
-
-    private static void handleGetAllSubtasks(HttpExchange exchange) throws IOException {
-        writeResponse(exchange, gson.toJson(fileBackedTasksManager.getAllSubtasks()), 200);
-    }
-    private static void handleGetTaskByID(HttpExchange exchange) throws IOException {
-        int RequestedTaskNumber = getIDfromRequest(exchange);
-        Type RequestedTaskType = Type.TASK;
-        String RequestedTaskTypeName = getTaskTypefromRequest(exchange);
-        if(RequestedTaskTypeName.equals("task")){
-            RequestedTaskType = Type.TASK;
-        } else if (RequestedTaskTypeName.equals("epic")){
-            RequestedTaskType = Type.EPIC;
-        } else if (RequestedTaskTypeName.equals("subtask")){
-            RequestedTaskType = Type.SUBTASK;
-        }
-        Type RealTaskTypeOfTheRequestedTask = fileBackedTasksManager.getTask(RequestedTaskNumber).getType();
-        if(RequestedTaskType.equals(RealTaskTypeOfTheRequestedTask)){
-            writeResponse(exchange, gson.toJson(fileBackedTasksManager.getTask(getIDfromRequest(exchange))), 200);
-        } else {
-            writeResponse(exchange, "URL-запрос ищет задачу с типом " + RequestedTaskType + " и номером " + getIDfromRequest(exchange) +
-                    ", но задачи с таким типом и таким номером нет", 400);
-        }
-    }
+//    private static void handleGetAllSubtasks(HttpExchange exchange) throws IOException {
+//        writeResponse(exchange, gson.toJson(fileBackedTasksManager.getAllSubtasks()), 200);
+//    }
+//    private static void handleGetTaskByID(HttpExchange exchange) throws IOException {
+//        int RequestedTaskNumber = getIDfromRequest(exchange);
+//        Type RequestedTaskType = Type.TASK;
+//        String RequestedTaskTypeName = getTaskTypefromRequest(exchange);
+//        if(RequestedTaskTypeName.equals("task")){
+//            RequestedTaskType = Type.TASK;
+//        } else if (RequestedTaskTypeName.equals("epic")){
+//            RequestedTaskType = Type.EPIC;
+//        } else if (RequestedTaskTypeName.equals("subtask")){
+//            RequestedTaskType = Type.SUBTASK;
+//        }
+//        Type RealTaskTypeOfTheRequestedTask = fileBackedTasksManager.getTask(RequestedTaskNumber).getType();
+//        if(RequestedTaskType.equals(RealTaskTypeOfTheRequestedTask)){
+//            writeResponse(exchange, gson.toJson(fileBackedTasksManager.getTask(getIDfromRequest(exchange))), 200);
+//        } else {
+//            writeResponse(exchange, "URL-запрос ищет задачу с типом " + RequestedTaskType + " и номером " + getIDfromRequest(exchange) +
+//                    ", но задачи с таким типом и таким номером нет", 400);
+//        }
+//    }
 
     private static Integer getIDfromRequest(HttpExchange exchange){
         return Integer.parseInt(exchange.getRequestURI().toString().split("\\?")[1].split("=")[1]);
@@ -360,11 +355,15 @@ public class HttpTaskServer {
         return exchange.getRequestURI().toString().split("/")[2];
     }
 
-    private static void handleGetHistory(HttpExchange exchange) throws IOException {
-        writeResponse(exchange, gson.toJson(fileBackedTasksManager.getAllSubtasks()), 200);
+    public void handleGetHistory(HttpExchange h) throws IOException {
+        if (!taskManager.getHistory().isEmpty()) {
+            outputStreamWrite(h, gson.toJson(taskManager.getHistory()), 200);
+        } else {
+            outputStreamWrite(h, "Cписок просмотра задач пуст.", 404);
+        }
     }
 
-    private static void handlePostTaskByBody(HttpExchange exchange) throws IOException {
+    private void handlePostTaskByBody(HttpExchange exchange) throws IOException {
         String body = httpBodyToString(exchange);
         if (body.isEmpty()) {
             writeResponse(exchange, "Ничего не передано.", 400);
@@ -383,7 +382,7 @@ public class HttpTaskServer {
         System.out.println(fileBackedTasksManager);
     }
 
-    private static void handlePostEpicByBody(HttpExchange exchange) throws IOException {
+    private void handlePostEpicByBody(HttpExchange exchange) throws IOException {
         String body = httpBodyToString(exchange);
         if (body.isEmpty()) {
             writeResponse(exchange, "Ничего не передано.", 400);
@@ -401,7 +400,7 @@ public class HttpTaskServer {
         }
         System.out.println(fileBackedTasksManager);
     }
-    private static void handlePostSubtaskByBody(HttpExchange exchange) throws IOException {
+    private void handlePostSubtaskByBody(HttpExchange exchange) throws IOException {
         String body = httpBodyToString(exchange);
         if (body.isEmpty()) {
             writeResponse(exchange, "Ничего не передано.", 400);
@@ -420,10 +419,10 @@ public class HttpTaskServer {
         System.out.println(fileBackedTasksManager);
     }
 
-    private static String httpBodyToString(HttpExchange exchange) throws IOException {
+    private String httpBodyToString(HttpExchange exchange) throws IOException {
         return new String(exchange.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
     }
-    private static void writeResponse(HttpExchange exchange,
+    private void writeResponse(HttpExchange exchange,
                                       String responseString,
                                       int responseCode) throws IOException {
         if(responseString.isBlank()) {
@@ -438,24 +437,24 @@ public class HttpTaskServer {
         exchange.close();
     }
 
-    enum Endpoint {
-        UNKNOWN,
-        GET_ALL_TASKS,
-        GET_ALL_EPICS,
-        GET_ALL_SUBTASKS,
-        GET_TASK_BY_ID,
-        GET_HISTORY,
-
-        POST_TASK_BY_BODY,
-        POST_EPIC_BY_BODY,
-        POST_SUBTASK_BY_BODY,
-        DELETE_TASK_BY_ID,
-        DELETE_ALL_TASKS,
-        GET_SUBTASK_METHODS,
-        GET_EPIC_METHODS,
-        GET_EPICS_SUBTASKS_BY_EPICS_ID,
-        GET_PRIORITIZED_TASKS
-    }
+//    enum Endpoint {
+//        UNKNOWN,
+//        GET_ALL_TASKS,
+//        GET_ALL_EPICS,
+//        GET_ALL_SUBTASKS,
+//        GET_TASK_BY_ID,
+//        GET_HISTORY,
+//
+//        POST_TASK_BY_BODY,
+//        POST_EPIC_BY_BODY,
+//        POST_SUBTASK_BY_BODY,
+//        DELETE_TASK_BY_ID,
+//        DELETE_ALL_TASKS,
+//        GET_SUBTASK_METHODS,
+//        GET_EPIC_METHODS,
+//        GET_EPICS_SUBTASKS_BY_EPICS_ID,
+//        GET_PRIORITIZED_TASKS
+//    }
 
     private static class LocalTimeAdapter extends TypeAdapter<LocalTime> {
         private final DateTimeFormatter formatterWriter = DateTimeFormatter.ofPattern("HH:mm");

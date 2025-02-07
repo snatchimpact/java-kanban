@@ -16,9 +16,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private File file;
 
     public FileBackedTaskManager(File ourFile) {
+        super();
         file = ourFile;
     }
-    public FileBackedTaskManager() {
+    public FileBackedTaskManager(HistoryManager historyManager, File file) {
+        super(historyManager);
+        this.file = file;
     }
 
     public static void main(String[] args){
@@ -123,8 +126,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     //Статический метод для чтения менеджера из файла
     public static FileBackedTaskManager loadFromFile(File file){
-        FileBackedTaskManager fileBackedTasksManager = new FileBackedTaskManager();
+        FileBackedTaskManager fileBackedTasksManager = new FileBackedTaskManager(file);
         fileBackedTasksManager.idCounter = 0;
+
         ArrayList<String> lines = new ArrayList<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
@@ -191,7 +195,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
 
         }
-
         return fileBackedTasksManager;
     }
 
